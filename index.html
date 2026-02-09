@@ -685,13 +685,13 @@ Data,Loja,Coordenadora,Transporte,Status
                     </header>
 
                     <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-                        <aside className="w-full md:w-[290px] bg-white border-r border-gray-200 flex flex-col h-full shrink-0 z-20 shadow-sm md:shadow-none">
+                        <aside className="w-full md:w-[240px] bg-white border-r border-gray-200 flex flex-col h-full shrink-0 z-20 shadow-sm md:shadow-none">
                             <div className="p-4 border-b border-gray-100 space-y-4 bg-white shrink-0">
                                 <div className="relative">
                                     <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
-                                    <input type="text" placeholder="Buscar loja..." className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-red-800" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <input type="text" placeholder="Buscar loja..." className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-800" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                 </div>
-                                <select className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-red-800" value={filterCoord} onChange={(e) => setFilterCoord(e.target.value)}>
+                                <select className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-800" value={filterCoord} onChange={(e) => setFilterCoord(e.target.value)}>
                                     <option value="all">Todas as Coordenadoras</option>
                                     {coordinators.map(c => (<option key={c} value={c}>{c}</option>))}
                                 </select>
@@ -722,7 +722,7 @@ Data,Loja,Coordenadora,Transporte,Status
                                             <div className="flex justify-between items-start">
                                                 <div className="w-full">
                                                     <div className="flex justify-between items-start">
-                                                        <div className="font-bold text-base text-gray-800 leading-tight">{store.name}</div>
+                                                        <div className="font-bold text-sm text-gray-800 leading-tight">{store.name}</div>
                                                         {store.city && <span className="text-xs font-medium bg-red-100 text-red-900 px-1.5 py-0.5 rounded-md ml-2 h-fit whitespace-nowrap">{store.city}</span>}
                                                     </div>
                                                     <div className="flex items-center gap-2 text-xs text-gray-500 mt-2 mb-3"><User size={14} />{store.coordinator}</div>
@@ -794,12 +794,12 @@ Data,Loja,Coordenadora,Transporte,Status
                                 </div>
                                 {selectedStoreId && <div className="hidden md:flex items-center gap-3 text-sm bg-red-50 text-red-800 px-4 py-2 rounded-full border border-red-200 animate-in fade-in shadow-sm"><span className="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span><span>Editando: <strong>{stores.find(s => s.id === selectedStoreId)?.name}</strong></span></div>}
                             </div>
-                            <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col min-h-0">
-                                <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 shrink-0">
-                                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (<div key={day} className="py-3 text-center text-base font-bold text-gray-600 uppercase tracking-wider">{day}</div>))}
+                            <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-300 overflow-hidden flex flex-col min-h-0">
+                                <div className="grid grid-cols-7 border-b border-gray-300 bg-gray-100 shrink-0">
+                                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (<div key={day} className="py-3 text-center text-base font-bold text-gray-800 uppercase tracking-wider">{day}</div>))}
                                 </div>
                                 <div className="grid grid-cols-7 auto-rows-fr flex-1 overflow-y-auto">
-                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-50/50 border-r border-b border-gray-100 min-h-[140px]" />))}
+                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-50/50 border-r border-b border-gray-300 min-h-[140px]" />))}
                                     {Array.from({ length: daysInMonth }).map((_, i) => {
                                         const day = i + 1;
                                         const dateStr = formatDate(year, month, day);
@@ -807,7 +807,7 @@ Data,Loja,Coordenadora,Transporte,Status
                                         const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
                                         const isTarget = !!selectedStoreId;
                                         return (
-                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative border-r border-b border-gray-100 p-2 md:p-3 min-h-[160px] transition-colors ${isTarget ? 'cursor-pointer hover:bg-red-50 hover:ring-inset hover:ring-2 hover:ring-red-800' : ''} ${isToday ? 'bg-red-900/5' : ''}`}>
+                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative border-r border-b border-gray-300 p-2 md:p-3 min-h-[160px] transition-colors ${isTarget ? 'cursor-pointer hover:bg-red-50 hover:ring-inset hover:ring-2 hover:ring-red-800' : ''} ${isToday ? 'bg-red-900/5' : ''}`}>
                                                 <div className="flex justify-between items-start mb-2">
                                                     <span className={`text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full ${isToday ? 'bg-red-800 text-white shadow-md' : 'text-gray-700'}`}>{day}</span>
                                                 </div>
