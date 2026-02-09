@@ -28,7 +28,7 @@
 
     <!-- Script Principal com Tipo Module para Importações -->
     <script type="text/babel" data-type="module">
-        // Importações via ESM para garantir compatibilidade e evitar erros de "lucideReact is not defined"
+        // Importações via ESM para garantir compatibilidade
         import React, { useState, useEffect, useMemo, useRef } from 'https://esm.sh/react@18.2.0';
         import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
         import { 
@@ -685,7 +685,7 @@ Data,Loja,Coordenadora,Transporte,Status
                     </header>
 
                     <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-                        <aside className="w-full md:w-[410px] bg-white border-r border-gray-200 flex flex-col h-full shrink-0 z-20 shadow-sm md:shadow-none">
+                        <aside className="w-full md:w-[290px] bg-white border-r border-gray-200 flex flex-col h-full shrink-0 z-20 shadow-sm md:shadow-none">
                             <div className="p-4 border-b border-gray-100 space-y-4 bg-white shrink-0">
                                 <div className="relative">
                                     <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
@@ -717,15 +717,15 @@ Data,Loja,Coordenadora,Transporte,Status
                                                 if (isSelected) { setSelectedStoreId(null); } 
                                                 else { setSelectedStoreId(store.id); if (status.scheduled) { const assign = assignments.find(a => a.storeId === store.id); if (assign) setSelectedTransport(assign.transport); } else { setSelectedTransport('car'); } }
                                             }}
-                                            className={`group p-4 rounded-xl border-2 transition-all duration-200 relative cursor-pointer ${status.scheduled ? (isSelected ? 'bg-red-50 border-red-900 ring-1 ring-red-900 shadow-md' : 'bg-white border-red-200 shadow-sm') : (isSelected ? 'bg-red-50 border-red-900 ring-1 ring-red-900 shadow-md z-10' : 'bg-white border-gray-100 hover:border-red-200 hover:shadow-sm')}`}
+                                            className={`group p-3 rounded-xl border-2 transition-all duration-200 relative cursor-pointer ${status.scheduled ? (isSelected ? 'bg-red-50 border-red-900 ring-1 ring-red-900 shadow-md' : 'bg-white border-red-200 shadow-sm') : (isSelected ? 'bg-red-50 border-red-900 ring-1 ring-red-900 shadow-md z-10' : 'bg-white border-gray-100 hover:border-red-200 hover:shadow-sm')}`}
                                         >
                                             <div className="flex justify-between items-start">
                                                 <div className="w-full">
                                                     <div className="flex justify-between items-start">
-                                                        <div className="font-bold text-xl text-gray-800 leading-tight">{store.name}</div>
-                                                        {store.city && <span className="text-sm font-medium bg-red-100 text-red-900 px-2 py-1 rounded-md ml-2 h-fit whitespace-nowrap">{store.city}</span>}
+                                                        <div className="font-bold text-base text-gray-800 leading-tight">{store.name}</div>
+                                                        {store.city && <span className="text-xs font-medium bg-red-100 text-red-900 px-1.5 py-0.5 rounded-md ml-2 h-fit whitespace-nowrap">{store.city}</span>}
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-base text-gray-500 mt-2 mb-3"><User size={16} />{store.coordinator}</div>
+                                                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-2 mb-3"><User size={14} />{store.coordinator}</div>
                                                     {!isSelected && isHovered && store.stats && (
                                                         <div className="absolute left-full top-0 ml-4 z-50 w-64 bg-slate-800 text-white p-4 rounded-xl shadow-2xl text-sm animate-in fade-in slide-in-from-left-2 pointer-events-none">
                                                             <div className="font-bold text-red-400 mb-3 border-b border-slate-700 pb-2 uppercase tracking-wider text-base">Indicadores</div>
