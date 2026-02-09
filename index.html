@@ -799,7 +799,7 @@ Data,Loja,Coordenadora,Transporte,Status
                                     {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (<div key={day} className="py-3 text-center text-base font-bold text-gray-800 uppercase tracking-wider">{day}</div>))}
                                 </div>
                                 <div className="grid grid-cols-7 auto-rows-fr flex-1 overflow-y-auto">
-                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-50/50 border-r border-b border-gray-300 min-h-[140px]" />))}
+                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-50/50 border-r border-b border-gray-300 min-h-[120px]" />))}
                                     {Array.from({ length: daysInMonth }).map((_, i) => {
                                         const day = i + 1;
                                         const dateStr = formatDate(year, month, day);
@@ -807,11 +807,11 @@ Data,Loja,Coordenadora,Transporte,Status
                                         const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
                                         const isTarget = !!selectedStoreId;
                                         return (
-                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative border-r border-b border-gray-300 p-2 md:p-3 min-h-[160px] transition-colors ${isTarget ? 'cursor-pointer hover:bg-red-50 hover:ring-inset hover:ring-2 hover:ring-red-800' : ''} ${isToday ? 'bg-red-900/5' : ''}`}>
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <span className={`text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full ${isToday ? 'bg-red-800 text-white shadow-md' : 'text-gray-700'}`}>{day}</span>
+                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative border-r border-b border-gray-300 p-1 md:p-2 min-h-[120px] transition-colors ${isTarget ? 'cursor-pointer hover:bg-red-50 hover:ring-inset hover:ring-2 hover:ring-red-800' : ''} ${isToday ? 'bg-red-900/5' : ''}`}>
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <span className={`text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-red-800 text-white shadow-md' : 'text-gray-700'}`}>{day}</span>
                                                 </div>
-                                                <div className="space-y-1.5">
+                                                <div className="space-y-1">
                                                     {dayAssignments.map((assign, idx) => {
                                                         const store = filteredStores.find(s => s.id === assign.storeId);
                                                         if (!store) return null;
@@ -819,12 +819,12 @@ Data,Loja,Coordenadora,Transporte,Status
                                                         const isAssignSelected = selectedStoreId === store.id;
                                                         const isCompleted = assign.completed;
                                                         return (
-                                                            <div key={idx} onClick={(e) => { e.stopPropagation(); setSelectedStoreId(store.id); setSelectedTransport(assign.transport); }} title={`Coordenadora: ${store.coordinator} | Transporte: ${getTransportLabel(assign.transport)}\nBalanço: ${store.stats?.lastBalance || '-'}`} className={`text-xs p-2 rounded-lg border shadow-sm relative group cursor-pointer transition-all flex flex-col items-center text-center ${isCompleted ? 'bg-green-700 text-white border-green-800 ring-1 ring-green-600' : `${coordColor} ${isAssignSelected ? 'ring-2 ring-red-800 shadow-lg scale-105 z-10' : 'hover:scale-105 hover:shadow-md'}`}`}>
-                                                                <span className="font-bold text-sm leading-tight w-full break-words">{store.name.replace('LOJA ', '')}</span>
-                                                                <span className={`mt-1 opacity-90 ${isCompleted ? 'text-green-200' : 'text-slate-600'}`}>{getTransportIcon(assign.transport || 'car', 16)}</span>
+                                                            <div key={idx} onClick={(e) => { e.stopPropagation(); setSelectedStoreId(store.id); setSelectedTransport(assign.transport); }} title={`Coordenadora: ${store.coordinator} | Transporte: ${getTransportLabel(assign.transport)}\nBalanço: ${store.stats?.lastBalance || '-'}`} className={`text-[10px] p-1.5 rounded-md border shadow-sm relative group cursor-pointer transition-all flex flex-col items-center text-center leading-tight ${isCompleted ? 'bg-green-700 text-white border-green-800 ring-1 ring-green-600' : `${coordColor} ${isAssignSelected ? 'ring-2 ring-red-800 shadow-lg scale-105 z-10' : 'hover:scale-105 hover:shadow-md'}`}`}>
+                                                                <span className="font-bold w-full break-words">{store.name.replace('LOJA ', '')}</span>
+                                                                <span className={`mt-0.5 opacity-90 ${isCompleted ? 'text-green-200' : 'text-slate-600'}`}>{getTransportIcon(assign.transport || 'car', 12)}</span>
                                                                 <div className="absolute top-0 right-0 flex opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 rounded-bl-lg shadow-sm border-l border-b border-gray-200">
-                                                                    <button onClick={(e) => { e.stopPropagation(); toggleCompletion(store.id); }} className={`p-1.5 hover:bg-green-100 rounded-bl-lg ${isCompleted ? 'text-green-600' : 'text-gray-400 hover:text-green-600'}`} title={isCompleted ? "Desmarcar" : "Marcar como Concluído"}><Check size={14} strokeWidth={3} /></button>
-                                                                    <button onClick={(e) => { e.stopPropagation(); removeAssignment(store.id); }} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50" title="Remover"><X size={14} /></button>
+                                                                    <button onClick={(e) => { e.stopPropagation(); toggleCompletion(store.id); }} className={`p-1 hover:bg-green-100 rounded-bl-lg ${isCompleted ? 'text-green-600' : 'text-gray-400 hover:text-green-600'}`} title={isCompleted ? "Desmarcar" : "Marcar como Concluído"}><Check size={12} strokeWidth={3} /></button>
+                                                                    <button onClick={(e) => { e.stopPropagation(); removeAssignment(store.id); }} className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50" title="Remover"><X size={12} /></button>
                                                                 </div>
                                                             </div>
                                                         );
