@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma Inventários 2026 - Diamantes</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- jsPDF & AutoTable (Mantidos como UMD para compatibilidade global) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Script Principal com Tipo Module para Importações -->
+    <script type="text/babel" data-type="module">
+        // Importações via ESM para garantir compatibilidade e evitar erros de "lucideReact is not defined"
+        import React, { useState, useEffect, useMemo, useRef } from 'https://esm.sh/react@18.2.0';
+        import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
+        import { 
+            Calendar as CalendarIcon, 
+            ChevronLeft, 
+            ChevronRight, 
+            Upload, 
+            Printer, 
+            Store, 
+            User, 
+            Search, 
+            CheckCircle2, 
+            X, 
+            Car, 
+            Bus, 
+            Plane, 
+            Database, 
+            TrendingUp, 
+            History, 
+            Trash2, 
+            AlertTriangle, 
+            Route, 
+            MapPin, 
+            Check 
+        } from 'https://esm.sh/lucide-react@0.344.0';
+
+        // --- DADOS E CONSTANTES ---
+        const CITY_COORDS = {
+            "FORTALEZA": { lat: -3.71722, lng: -38.5434 },
+            "TERESINA": { lat: -5.09200, lng: -42.8038 },
+            "NATAL": { lat: -5.79448, lng: -35.2110 },
+            "JOAO PESSOA": { lat: -7.11949, lng: -34.8450 },
+            "MACEIO": { lat: -9.66625, lng: -35.7351 },
+            "ARACAJU": { lat: -10.9472, lng: -37.0731 },
+            "SALVADOR": { lat: -12.9777, lng: -38.5016 },
+            "SAO LUIS": { lat: -2.53073, lng: -44.3068 },
+            "BELEM": { lat: -1.45575, lng: -48.4902 },
+            "MOSSORO": { lat: -5.18625, lng: -37.3469 },
+            "CAMPINA GRANDE": { lat: -7.22196, lng: -35.8845 },
+            "PICOS": { lat: -7.07823, lng: -41.4707 },
+            "IMPERATRIZ": { lat: -5.52655, lng: -47.4760 },
+            "MARABA": { lat: -5.3686, lng: -49.1174 },
+            "CARUARU": { lat: -8.28311, lng: -35.9754 },
+            "FEIRA DE SANTANA": { lat: -12.2608, lng: -38.9626 },
+            "PAULO AFONSO": { lat: -9.3986, lng: -38.2255 },
+            "GARANHUNS": { lat: -8.8824, lng: -36.4965 },
+            "ARAPIRACA": { lat: -9.7562, lng: -36.6606 },
+            "ITABAIANA": { lat: -10.6853, lng: -37.4267 },
+            "BACABAL": { lat: -4.2238, lng: -44.7869 },
+            "CASTANHAL": { lat: -1.2965, lng: -47.9254 },
+            "PEDREIRAS": { lat: -4.5684, lng: -44.5982 },
+            "SANTA INES": { lat: -3.6664, lng: -45.3804 },
+            "PINHEIRO": { lat: -2.5186, lng: -45.0805 },
+            "PRESIDENTE DUTRA": { lat: -5.2891, lng: -44.4905 },
+            "PARAUAPEBAS": { lat: -6.0674, lng: -49.9023 },
+            "ACAILANDIA": { lat: -4.9452, lng: -47.4984 },
+            "SANTA RITA": { lat: -7.1122, lng: -34.9753 },
+            "PARNAIBA": { lat: -2.9095, lng: -41.7766 },
+            "ALAGOINHAS": { lat: -12.1356, lng: -38.4284 },
+            "BRASILIA": { lat: -15.7975, lng: -47.8919 },
+            "FRECHEIRINHA": { lat: -3.7553, lng: -40.8178 }, 
+            "VILA UNIAO": { lat: -3.7553, lng: -38.5375 },
+            "MARAPONGA": { lat: -3.7925, lng: -38.5670 },
+            "PARNAMIRIM": { lat: -5.9157, lng: -35.2635 },
+        };
+
+        const NAME_ALIASES = {
+            "F. DE SANTANA": "FEIRA DE SANTANA 1",
+            "CAMP. GRANDE": "CAMPINA GRANDE",
+            "VILA UNIAO": "VILA UNIAO", 
+            "ARACAJU 01": "ARACAJU 1",
+            "ARACAJU 03": "ARACAJU 3",
+            "JOAO PESSOA 04": "JOAO PESSOA 4",
+            "JOAO PESSOA 03": "JOAO PESSOA 3",
+            "LOJA CETRO": "DIAMANTES CENTRO",
+            "LOJA BR": "BR",
+            "TELEDIGITAL": "TELEDIGITAL",
+            "MACEIO 02": "MACEIO 2",
+            "MACEIO 03": "MACEIO 3",
+            "SAO LUIS 01": "SAO LUIS 1",
+            "MARAPONGA": "MARAPONGA",
+            "ARAPIRACA 02": "ARAPIRACA 2",
+            "ARAPIRACA 01": "ARAPIRACA 1",
+        };
+
+        const INITIAL_RAW_DATA = `
+JULIETA MATOS
+LOJA TERESINA 5
+LOJA JOAO PESSOA 1
+LOJA PICOS
+LOJA JOAO PESSOA 2
+LOJA SANTA RITA
+LOJA TERESINA 4
+LOJA CAMPINA GRANDE
+LOJA NATAL 3
+LOJA FORTALEZA 1
+LOJA NATAL 1
+LOJA TERESINA 3
+LOJA BR
+LOJA JOAO PESSOA 4
+LOJA PARNAMIRIM
+LOJA JOAO PESSOA 3
+LOJA MOSSORO
+LOJA PATOS
+LOJA FORTALEZA 5
+LOJA PARNAIBA
+LOJA DIAMANTES CENTRO
+LOJA TELEDIGITAL
+LOJA MARAPONGA
+LOJA VILA UNIAO
+
+ELITIANE GOMES
+LOJA ACAILANDIA
+LOJA BELEM 1
+LOJA BELEM 2
+LOJA PARAUAPEBAS
+LOJA SAO LUIS 4
+LOJA PRESIDENTE DUTRA
+LOJA PINHEIRO
+LOJA BACABAL 1
+LOJA CASTANHAL
+LOJA PEDREIRAS
+LOJA SANTA INES
+LOJA MARABA
+LOJA SAO LUIS 3
+LOJA SAO LUIS 2
+LOJA IMPERATRIZ
+LOJA SAO LUIS 1
+
+LUCIANA OLIVEIRA
+LOJA BRASILIA
+LOJA FEIRA DE SANTANA 1
+LOJA CARUARU
+LOJA GARANHUNS
+LOJA PAULO AFONSO 1
+LOJA ARACAJU 3
+LOJA MACEIO 2
+LOJA ARACAJU 1
+LOJA MACEIO 3
+LOJA ALAGOINHAS
+LOJA ARAPIRACA 1
+LOJA ARAPIRACA 2
+LOJA ITABAIANA
+`;
+
+        const INITIAL_STATS_CSV = `
+LL,CICLO,LOJAS,ACURACIDADE
+2022,1,Patos,0.9930
+2025,1,Aracaju 3,0.8683
+2025,1,Fortaleza 1 (44),0.9850
+2025,1,João Pessoa 4,
+2025,1,Campina Grande,0.9500
+2025,1,Mossoro,0.9720
+2025,1,Natal 1,0.9910
+`;
+
+        const INITIAL_SCHEDULE_CSV = `
+Data,Loja,Coordenadora,Transporte,Status
+2026-03-02,LOJA PATOS,JULIETA MATOS,Carro,PENDENTE
+2026-03-03,LOJA PAULO AFONSO 1,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-03-04,LOJA ALAGOINHAS,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-03-05,LOJA FEIRA DE SANTANA 1,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-03-09,LOJA BR,JULIETA MATOS,Carro,PENDENTE
+2026-03-10,LOJA DIAMANTES CENTRO,JULIETA MATOS,Carro,PENDENTE
+2026-03-11,LOJA TELEDIGITAL,JULIETA MATOS,Carro,PENDENTE
+2026-01-13,LOJA GARANHUNS,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-01-14,LOJA CARUARU,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-04-06,LOJA IMPERATRIZ,ELITIANE GOMES,Carro,PENDENTE
+2026-04-07,LOJA ACAILANDIA,ELITIANE GOMES,Carro,PENDENTE
+2026-04-08,LOJA MARABA,ELITIANE GOMES,Carro,PENDENTE
+2026-04-09,LOJA PARAUAPEBAS,ELITIANE GOMES,Carro,PENDENTE
+2026-05-04,LOJA JOAO PESSOA 1,JULIETA MATOS,Carro,PENDENTE
+2026-05-05,LOJA JOAO PESSOA 2,JULIETA MATOS,Carro,PENDENTE
+2026-05-06,LOJA JOAO PESSOA 3,JULIETA MATOS,Carro,PENDENTE
+2026-05-07,LOJA JOAO PESSOA 4,JULIETA MATOS,Carro,PENDENTE
+2026-05-13,LOJA BRASILIA,LUCIANA OLIVEIRA,Avião,PENDENTE
+2026-06-02,LOJA MACEIO 2,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-06-03,LOJA MACEIO 3,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-06-05,LOJA ARAPIRACA 2,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-06-04,LOJA ARAPIRACA 1,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-07-07,LOJA TERESINA 3,JULIETA MATOS,Carro,PENDENTE
+2026-07-08,LOJA TERESINA 4,JULIETA MATOS,Carro,PENDENTE
+2026-07-09,LOJA TERESINA 5,JULIETA MATOS,Carro,PENDENTE
+2026-07-06,LOJA PICOS,JULIETA MATOS,Carro,PENDENTE
+2026-07-10,LOJA PARNAIBA,JULIETA MATOS,Carro,PENDENTE
+2026-07-14,LOJA FORTALEZA 1,JULIETA MATOS,Carro,PENDENTE
+2026-07-15,LOJA FORTALEZA 5,JULIETA MATOS,Carro,PENDENTE
+2026-08-04,LOJA ARACAJU 1,LUCIANA OLIVEIRA,Avião,PENDENTE
+2026-08-05,LOJA ARACAJU 3,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-08-06,LOJA ITABAIANA,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-09-07,LOJA PINHEIRO,ELITIANE GOMES,Carro,PENDENTE
+2026-09-08,LOJA SAO LUIS 1,ELITIANE GOMES,Carro,PENDENTE
+2026-09-09,LOJA SAO LUIS 2,ELITIANE GOMES,Carro,PENDENTE
+2026-09-10,LOJA SAO LUIS 3,ELITIANE GOMES,Carro,PENDENTE
+2026-09-11,LOJA SAO LUIS 4,ELITIANE GOMES,Carro,PENDENTE
+2026-10-07,LOJA PEDREIRAS,ELITIANE GOMES,Carro,PENDENTE
+2026-10-06,LOJA PRESIDENTE DUTRA,ELITIANE GOMES,Carro,PENDENTE
+2026-10-09,LOJA SANTA INES,ELITIANE GOMES,Carro,PENDENTE
+2026-10-08,LOJA BACABAL 1,ELITIANE GOMES,Carro,PENDENTE
+2026-10-20,LOJA BELEM 1,ELITIANE GOMES,Avião,PENDENTE
+2026-10-21,LOJA BELEM 2,ELITIANE GOMES,Avião,PENDENTE
+2026-10-22,LOJA CASTANHAL,ELITIANE GOMES,Carro,PENDENTE
+2026-07-14,LOJA VILA UNIAO,JULIETA MATOS,Carro,PENDENTE
+2026-07-15,LOJA MARAPONGA,JULIETA MATOS,Carro,PENDENTE
+2026-11-06,LOJA CAMPINA GRANDE,JULIETA MATOS,Carro,PENDENTE
+2026-11-02,LOJA NATAL 3,JULIETA MATOS,Carro,PENDENTE
+2026-11-03,LOJA NATAL 1,JULIETA MATOS,Carro,PENDENTE
+2026-11-04,LOJA SANTA RITA,JULIETA MATOS,Carro,PENDENTE
+2026-11-05,LOJA PARNAMIRIM,JULIETA MATOS,Carro,PENDENTE
+2026-07-16,LOJA MOSSORO,JULIETA MATOS,Carro,PENDENTE
+`;
+
+        // --- FUNÇÕES UTILITÁRIAS ---
+        const calculateDistance = (lat1, lon1, lat2, lon2) => {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+            return R * c;
+        };
+
+        const normalizeName = (name) => {
+            let clean = name.toUpperCase().replace('LOJA ', '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            if (NAME_ALIASES[clean]) { clean = NAME_ALIASES[clean]; }
+            return clean.replace(/0+(\d+)/, '$1').replace(/\s+\(\d+\)$/, '').trim();
+        };
+
+        const inferCityFromName = (name) => {
+            let clean = name.toUpperCase().replace('LOJA ', '').trim();
+            clean = clean.replace(/\s+\d+$/, '');
+            if (clean === "BR") return "FRECHEIRINHA";
+            if (clean === "DIAMANTES CENTRO") return "FORTALEZA";
+            return clean;
+        };
+
+        const parseStoreList = (text) => {
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const stores = [];
+            let currentCoordinator = "Sem Coordenador";
+            lines.forEach((line) => {
+                if (line.toUpperCase() === 'LOJA' || line.length < 3) return;
+                if (line.toUpperCase().startsWith('LOJA ')) {
+                    stores.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        name: line,
+                        coordinator: currentCoordinator,
+                        city: inferCityFromName(line)
+                    });
+                } else {
+                    currentCoordinator = line;
+                }
+            });
+            return stores;
+        };
+
+        const parseIndicators = (csvText) => {
+            const statsMap = {};
+            const lines = csvText.split(/\r?\n/);
+            let delimiter = ',';
+            const sample = lines.slice(0, 10).join('\n');
+            if ((sample.match(/;/g) || []).length > (sample.match(/,/g) || []).length) delimiter = ';';
+            
+            let startRowIndex = -1;
+            let idxLL = 0, idxCiclo = 1, idxLojas = 2, idxAcc = 15;
+
+            for (let i = 0; i < Math.min(lines.length, 20); i++) {
+                const lineUpper = lines[i].toUpperCase();
+                if (lineUpper.includes('LL') && (lineUpper.includes('CICLO') || lineUpper.includes('LOJAS'))) {
+                    startRowIndex = i + 1;
+                    const headers = lines[i].split(delimiter).map(h => h.trim().toUpperCase());
+                    const findLL = headers.indexOf('LL');
+                    const findCiclo = headers.indexOf('CICLO');
+                    const findLojas = headers.findIndex(h => h === 'LOJAS' || h === 'LOJA');
+                    const findAcc = headers.findIndex(h => h.includes('ACURACIDADE'));
+
+                    if (findLL > -1) idxLL = findLL;
+                    if (findCiclo > -1) idxCiclo = findCiclo;
+                    if (findLojas > -1) idxLojas = findLojas;
+                    if (findAcc > -1) idxAcc = findAcc;
+                    break;
+                }
+            }
+
+            if (startRowIndex === -1) startRowIndex = 1;
+            const tracking = {};
+
+            for (let i = startRowIndex; i < lines.length; i++) {
+                const row = lines[i].split(delimiter);
+                if (row.length <= Math.max(idxLojas, idxAcc) && idxAcc !== 15) continue; 
+                const rawName = row[idxLojas];
+                if (!rawName || rawName.trim() === '') continue;
+                
+                const nameKey = normalizeName(rawName);
+                const year = parseInt(row[idxLL]) || 0;
+                const cycle = parseInt(row[idxCiclo]) || 0;
+                const rawAcc = row[idxAcc] || "";
+                
+                const currentTrack = tracking[nameKey] || { y: -1, c: -1 };
+                
+                if (year > currentTrack.y || (year === currentTrack.y && cycle > currentTrack.c)) {
+                    tracking[nameKey] = { y: year, c: cycle };
+                    let accDisplay = rawAcc;
+                    try {
+                        const normalizedNum = rawAcc.replace(',', '.');
+                        const val = parseFloat(normalizedNum);
+                        if (!isNaN(val)) {
+                            const percentage = val <= 1.05 ? val * 100 : val;
+                            accDisplay = percentage.toFixed(2) + '%';
+                        }
+                    } catch (e) {}
+                    statsMap[nameKey] = { lastBalance: `Ciclo ${cycle}/${year}`, accuracy: accDisplay };
+                }
+            }
+            return statsMap;
+        };
+
+        const parseScheduleCSV = (csvText, stores) => {
+            const assignments = [];
+            const lines = csvText.split(/\r?\n/).filter(l => l.trim().length > 0);
+            const startIdx = lines[0].toLowerCase().startsWith("data") ? 1 : 0;
+
+            for (let i = startIdx; i < lines.length; i++) {
+                const row = lines[i].split(',');
+                if (row.length < 2) continue;
+                const dateStr = row[0].trim();
+                const rawStoreName = row[1].trim();
+                const rawTransport = row[3]?.trim().toLowerCase();
+                const rawStatus = row[4]?.trim().toUpperCase();
+                const normalizedCalName = normalizeName(rawStoreName);
+                const match = stores.find(s => normalizeName(s.name) === normalizedCalName);
+
+                if (match) {
+                    let transport = 'car';
+                    if (rawTransport && (rawTransport.includes('avi') || rawTransport.includes('plane'))) transport = 'plane';
+                    else if (rawTransport && (rawTransport.includes('bus') || rawTransport.includes('oni'))) transport = 'bus';
+                    const isCompleted = rawStatus === 'CONCLUIDO' || rawStatus === 'REALIZADO';
+                    assignments.push({ storeId: match.id, dateStr: dateStr, transport: transport, completed: isCompleted });
+                }
+            }
+            return assignments;
+        };
+
+        const formatDate = (year, month, day) => {
+            return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        };
+
+        const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+        const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
+
+        const getTransportIcon = (type, size = 12) => {
+            switch (type) {
+                case 'bus': return <Bus size={size} />;
+                case 'plane': return <Plane size={size} />;
+                case 'car': default: return <Car size={size} />;
+            }
+        };
+
+        const getTransportLabel = (type) => {
+            switch (type) {
+                case 'bus': return 'Ônibus';
+                case 'plane': return 'Avião';
+                case 'car': default: return 'Carro';
+            }
+        };
+
+        // --- COMPONENTE PRINCIPAL ---
+        function App() {
+            const [stores, setStores] = useState([]);
+            const [stats, setStats] = useState({});
+            const [assignments, setAssignments] = useState([]);
+            const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 1)); 
+            const [selectedStoreId, setSelectedStoreId] = useState(null);
+            const [selectedTransport, setSelectedTransport] = useState('car');
+            const [filterCoord, setFilterCoord] = useState('all');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [hoveredStoreId, setHoveredStoreId] = useState(null);
+            const [pdfReady, setPdfReady] = useState(false);
+            const storeRefs = useRef({});
+
+            useEffect(() => {
+                // Initialize jsPDF globally from the UMD loaded in head
+                const checkJsPDF = () => {
+                    if (window.jspdf && window.jspdf.jsPDF) {
+                        window.jsPDF = window.jspdf.jsPDF;
+                        setPdfReady(true);
+                    }
+                };
+                checkJsPDF();
+                // If it loads later
+                window.onload = checkJsPDF;
+            }, []);
+            
+            useEffect(() => {
+                const loadedStores = parseStoreList(INITIAL_RAW_DATA);
+                setStores(loadedStores);
+                const loadedStats = parseIndicators(INITIAL_STATS_CSV);
+                setStats(loadedStats);
+                const defaultAssignments = parseScheduleCSV(INITIAL_SCHEDULE_CSV, loadedStores);
+
+                const savedAssign = localStorage.getItem('diamantes_inventory_assignments_v11');
+                if (savedAssign) {
+                    const parsed = JSON.parse(savedAssign);
+                    if (parsed.length > 0) {
+                        const merged = [...parsed];
+                        defaultAssignments.forEach(def => {
+                            if (!merged.some(m => m.storeId === def.storeId && m.dateStr === def.dateStr)) {
+                                merged.push(def);
+                            }
+                        });
+                        setAssignments(merged);
+                    } else {
+                        setAssignments(defaultAssignments);
+                    }
+                } else {
+                    setAssignments(defaultAssignments);
+                }
+
+                const savedStats = localStorage.getItem('diamantes_inventory_stats');
+                if (savedStats) {
+                    setStats(prev => ({ ...prev, ...JSON.parse(savedStats) }));
+                }
+            }, []);
+
+            useEffect(() => {
+                localStorage.setItem('diamantes_inventory_assignments_v11', JSON.stringify(assignments));
+            }, [assignments]);
+
+            useEffect(() => {
+                localStorage.setItem('diamantes_inventory_stats', JSON.stringify(stats));
+            }, [stats]);
+
+            useEffect(() => {
+                if (selectedStoreId && storeRefs.current[selectedStoreId]) {
+                    storeRefs.current[selectedStoreId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, [selectedStoreId]);
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = getDaysInMonth(year, month);
+            const firstDay = getFirstDayOfMonth(year, month);
+            
+            const monthNames = [ "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro" ];
+
+            const coordinators = useMemo(() => {
+                const coords = new Set(stores.map(s => s.coordinator));
+                return Array.from(coords).sort();
+            }, [stores]);
+
+            const getStoreStatus = (id) => {
+                const assign = assignments.find(a => a.storeId === id);
+                return assign ? { scheduled: true, date: assign.dateStr } : { scheduled: false, date: null };
+            };
+
+            const filteredStores = useMemo(() => {
+                return stores.map(store => {
+                    const key = normalizeName(store.name);
+                    const storeStat = stats[key];
+                    return { ...store, stats: storeStat };
+                }).filter(store => {
+                    const matchesSearch = store.name.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesCoord = filterCoord === 'all' || store.coordinator === filterCoord;
+                    return matchesSearch && matchesCoord;
+                });
+            }, [stores, stats, searchTerm, filterCoord]);
+
+            const nearbyStores = useMemo(() => {
+                if (!selectedStoreId) return [];
+                const selectedStore = stores.find(s => s.id === selectedStoreId);
+                if (!selectedStore || !selectedStore.city) return [];
+                const originCoords = CITY_COORDS[selectedStore.city];
+                if (!originCoords) return []; 
+                return stores
+                    .filter(s => s.id !== selectedStoreId && s.city && CITY_COORDS[s.city]) 
+                    .map(s => {
+                        const targetCoords = CITY_COORDS[s.city];
+                        const dist = calculateDistance(originCoords.lat, originCoords.lng, targetCoords.lat, targetCoords.lng);
+                        return { ...s, distance: dist };
+                    })
+                    .filter(s => s.distance <= 400) 
+                    .sort((a, b) => a.distance - b.distance); 
+            }, [selectedStoreId, stores]);
+
+            const scheduledCount = assignments.length;
+            const progress = stores.length > 0 ? (scheduledCount / stores.length) * 100 : 0;
+
+            const handleFileUpload = (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const text = event.target?.result;
+                    const isDatabase = text.toUpperCase().includes('ACURACIDADE') || text.toUpperCase().includes('LL');
+                    if (isDatabase) {
+                        const newStats = parseIndicators(text);
+                        if (Object.keys(newStats).length > 0 && confirm(`Encontrados dados de ${Object.keys(newStats).length} lojas. Atualizar?`)) {
+                            setStats(prev => ({ ...prev, ...newStats }));
+                        }
+                    } else {
+                        if (text.includes('Data') && text.includes('Loja')) {
+                            const newAssigns = parseScheduleCSV(text, stores);
+                            if (newAssigns.length > 0 && confirm(`Carregar ${newAssigns.length} agendamentos?`)) {
+                                setAssignments(newAssigns);
+                            }
+                        } else {
+                            const parsed = parseStoreList(text);
+                            if (parsed.length > 0 && confirm(`Substituir lista por ${parsed.length} lojas?`)) {
+                                setStores(parsed);
+                                setAssignments([]); 
+                            }
+                        }
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            const handleDateClick = (day) => {
+                const dateStr = formatDate(year, month, day);
+                if (selectedStoreId) {
+                    const newAssignments = assignments.filter(a => a.storeId !== selectedStoreId);
+                    newAssignments.push({ storeId: selectedStoreId, dateStr, transport: selectedTransport, completed: false });
+                    setAssignments(newAssignments);
+                    setSelectedStoreId(null); 
+                }
+            };
+
+            const removeAssignment = (storeId) => {
+                setAssignments(assignments.filter(a => a.storeId !== storeId));
+                if (selectedStoreId === storeId) setSelectedStoreId(null);
+            };
+
+            const toggleCompletion = (storeId) => {
+                setAssignments(prev => prev.map(a => a.storeId === storeId ? { ...a, completed: !a.completed } : a));
+            };
+
+            const updateTransport = (storeId, type) => {
+                setSelectedTransport(type);
+                if (assignments.some(a => a.storeId === storeId)) {
+                    setAssignments(assignments.map(a => a.storeId === storeId ? { ...a, transport: type } : a));
+                }
+            };
+
+            const exportCSV = () => {
+                const headers = ["Data", "Loja", "Coordenadora", "Transporte", "Status", "Ultimo Balanco", "Acuracidade"];
+                const rows = assignments.map(a => {
+                    const store = filteredStores.find(s => s.id === a.storeId);
+                    return [
+                        a.dateStr,
+                        store?.name || "Loja Desconhecida",
+                        store?.coordinator || "-",
+                        getTransportLabel(a.transport || 'car'),
+                        a.completed ? "CONCLUIDO" : "PENDENTE",
+                        store?.stats?.lastBalance || "-",
+                        store?.stats?.accuracy || "-"
+                    ].join(",");
+                });
+                filteredStores.filter(s => !assignments.find(a => a.storeId === s.id)).forEach(s => {
+                    rows.push(`Não Agendado,${s.name},${s.coordinator},-,PENDENTE,${s.stats?.lastBalance || "-"},${s.stats?.accuracy || "-"}`);
+                });
+                const blob = new Blob(["\uFEFF" + headers.join(",") + "\n" + rows.join("\n")], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", "cronograma_inventario_diamantes.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            const handleExportPDF = () => {
+                if (!pdfReady || !window.jsPDF) { alert("Aguarde, carregando biblioteca de PDF..."); return; }
+                try {
+                    const doc = new window.jsPDF();
+                    doc.setFillColor(153, 27, 27);
+                    doc.rect(0, 0, 210, 20, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(16);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Cronograma anual de inventários / 2026", 14, 13);
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("Diamantes Lingerie", 160, 13);
+
+                    const tableColumn = ["Data", "Loja", "Coordenadora", "Transporte", "Status"];
+                    const tableRows = [];
+                    const sortedAssignments = [...assignments].sort((a,b) => a.dateStr.localeCompare(b.dateStr));
+                    let lastDate = null;
+
+                    sortedAssignments.forEach(assign => {
+                        const currentDate = new Date(assign.dateStr + 'T12:00:00');
+                        if (lastDate) {
+                            const diffDays = Math.ceil(Math.abs(currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+                            if (diffDays > 3) {
+                                tableRows.push([{ content: '', colSpan: 5, styles: { fillColor: [255, 255, 255], minCellHeight: 5 } }]);
+                            }
+                        }
+                        const store = stores.find(s => s.id === assign.storeId);
+                        tableRows.push([
+                            assign.dateStr.split('-').reverse().join('/'),
+                            store?.name.replace('LOJA ', '') || '',
+                            store?.coordinator || '',
+                            getTransportLabel(assign.transport),
+                            assign.completed ? 'CONCLUÍDO' : 'PENDENTE'
+                        ]);
+                        lastDate = currentDate;
+                    });
+
+                    doc.autoTable({
+                        head: [tableColumn],
+                        body: tableRows,
+                        startY: 25,
+                        theme: 'grid',
+                        headStyles: { fillColor: [153, 27, 27], textColor: [255, 255, 255] },
+                        styles: { fontSize: 8, cellPadding: 2, lineColor: [200, 200, 200] },
+                        alternateRowStyles: { fillColor: [255, 241, 242] },
+                    });
+                    doc.save("cronograma_diamantes_2026.pdf");
+                } catch (err) { console.error(err); alert("Erro ao gerar PDF."); }
+            };
+
+            const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+            const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+
+            return (
+                <div className="h-screen bg-gray-50 flex flex-col font-sans text-slate-800 overflow-hidden">
+                    <header className="bg-gradient-to-r from-red-900 to-red-800 text-white px-6 py-4 flex flex-col md:flex-row justify-between items-center shadow-lg z-10 shrink-0">
+                        <div className="flex items-center gap-4 mb-4 md:mb-0">
+                            <div className="bg-white/10 p-2.5 rounded-lg text-white backdrop-blur-sm border border-white/20 shadow-inner">
+                                <Store size={28} />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold leading-tight tracking-tight text-white drop-shadow-sm">Cronograma anual de inventários / 2026</h1>
+                                <p className="text-xs font-medium text-red-100 uppercase tracking-widest opacity-90">Diamantes Lingerie</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <div className="hidden md:block text-right">
+                                <div className="text-xs font-semibold text-red-100 uppercase tracking-wider mb-1">Progresso do Mês</div>
+                                <div className="w-40 h-2.5 bg-black/20 rounded-full overflow-hidden backdrop-blur-sm border border-white/10">
+                                    <div className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-700 ease-out" style={{ width: `${progress}%` }}></div>
+                                </div>
+                                <div className="text-xs text-red-100 mt-1.5 font-medium text-right">{scheduledCount} de {stores.length} lojas</div>
+                            </div>
+                            <div className="flex gap-3">
+                                <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-lg transition-all text-sm font-semibold backdrop-blur-sm shadow-sm hover:shadow-md active:scale-95">
+                                    <Upload className="rotate-180" size={18} /> CSV
+                                </button>
+                                <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white text-red-900 hover:bg-red-50 rounded-lg transition-all text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                                    <Printer size={18} /> Exportar PDF
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+                        <aside className="w-full md:w-[640px] bg-white border-r border-gray-200 flex flex-col h-full shrink-0 z-20 shadow-sm md:shadow-none">
+                            <div className="p-4 border-b border-gray-100 space-y-4 bg-white shrink-0">
+                                <div className="relative">
+                                    <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                                    <input type="text" placeholder="Buscar loja..." className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-red-800" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                </div>
+                                <select className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-red-800" value={filterCoord} onChange={(e) => setFilterCoord(e.target.value)}>
+                                    <option value="all">Todas as Coordenadoras</option>
+                                    {coordinators.map(c => (<option key={c} value={c}>{c}</option>))}
+                                </select>
+                                <label className="flex items-center gap-3 p-4 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:bg-red-50 hover:border-red-800 transition-colors group">
+                                    <Database size={24} className="text-gray-400 group-hover:text-red-800" />
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-semibold text-gray-600 group-hover:text-red-900">Importar Arquivo</span>
+                                        <span className="text-xs text-gray-400">Suporta Lista de Lojas ou CSV do Banco de Dados</span>
+                                    </div>
+                                    <input type="file" accept=".csv,.txt" className="hidden" onChange={handleFileUpload} />
+                                </label>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                <h3 className="text-sm font-bold text-gray-500 uppercase px-1 mb-3">Lojas Disponíveis</h3>
+                                {filteredStores.map(store => {
+                                    const status = getStoreStatus(store.id);
+                                    const isSelected = selectedStoreId === store.id;
+                                    const isHovered = hoveredStoreId === store.id;
+                                    return (
+                                        <div key={store.id} ref={el => storeRefs.current[store.id] = el}
+                                            onMouseEnter={() => setHoveredStoreId(store.id)} onMouseLeave={() => setHoveredStoreId(null)}
+                                            onClick={() => {
+                                                if (isSelected) { setSelectedStoreId(null); } 
+                                                else { setSelectedStoreId(store.id); if (status.scheduled) { const assign = assignments.find(a => a.storeId === store.id); if (assign) setSelectedTransport(assign.transport); } else { setSelectedTransport('car'); } }
+                                            }}
+                                            className={`group p-4 rounded-xl border-2 transition-all duration-200 relative cursor-pointer ${status.scheduled ? (isSelected ? 'bg-red-50 border-red-900 ring-1 ring-red-900 shadow-md' : 'bg-white border-red-200 shadow-sm') : (isSelected ? 'bg-red-50 border-red-900 ring-1 ring-red-900 shadow-md z-10' : 'bg-white border-gray-100 hover:border-red-200 hover:shadow-sm')}`}
+                                        >
+                                            <div className="flex justify-between items-start">
+                                                <div className="w-full">
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="font-bold text-xl text-gray-800 leading-tight">{store.name}</div>
+                                                        {store.city && <span className="text-sm font-medium bg-red-100 text-red-900 px-2 py-1 rounded-md ml-2 h-fit whitespace-nowrap">{store.city}</span>}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-base text-gray-500 mt-2 mb-3"><User size={16} />{store.coordinator}</div>
+                                                    {!isSelected && isHovered && store.stats && (
+                                                        <div className="absolute left-full top-0 ml-4 z-50 w-64 bg-slate-800 text-white p-4 rounded-xl shadow-2xl text-sm animate-in fade-in slide-in-from-left-2 pointer-events-none">
+                                                            <div className="font-bold text-red-400 mb-3 border-b border-slate-700 pb-2 uppercase tracking-wider text-base">Indicadores</div>
+                                                            <div className="space-y-3">
+                                                                <div className="flex justify-between items-center"><span className="text-slate-400 flex items-center gap-2"><History size={14}/> Último Balanço:</span><span className="font-mono text-base">{store.stats.lastBalance}</span></div>
+                                                                <div className="flex justify-between items-center"><span className="text-slate-400 flex items-center gap-2"><TrendingUp size={14}/> Acuracidade:</span><span className={`font-mono font-bold text-base ${parseFloat(store.stats.accuracy) > 99 ? 'text-green-400' : 'text-yellow-400'}`}>{store.stats.accuracy}</span></div>
+                                                            </div>
+                                                            <div className="absolute top-6 -left-2 w-4 h-4 bg-slate-800 rotate-45"></div>
+                                                        </div>
+                                                    )}
+                                                    {(isSelected) && (
+                                                        <div className="space-y-4 mt-3">
+                                                            {store.stats ? (
+                                                                <div className="bg-white/60 rounded-lg p-3 border border-red-200 text-sm text-gray-700">
+                                                                    <div className="flex justify-between mb-2"><span>Último Balanço:</span><span className="font-semibold">{store.stats.lastBalance}</span></div>
+                                                                    <div className="flex justify-between"><span>Acuracidade:</span><span className={`font-bold ${parseFloat(store.stats.accuracy) > 99 ? 'text-green-600' : 'text-orange-500'}`}>{store.stats.accuracy}</span></div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="bg-orange-50 rounded-lg p-3 border border-orange-100 text-sm text-orange-700 flex items-center gap-2"><AlertTriangle size={16} /><span>Sem dados de balanço.</span></div>
+                                                            )}
+                                                            {nearbyStores.length > 0 && (
+                                                                <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+                                                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase mb-3"><Route size={14} />Próximas (até 400km)</div>
+                                                                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                                                                        {nearbyStores.map(ns => {
+                                                                            const nsStatus = getStoreStatus(ns.id);
+                                                                            return (
+                                                                                <div key={ns.id} className="flex justify-between items-center text-sm p-2 bg-white rounded-lg border border-slate-100 shadow-sm">
+                                                                                    <div className="truncate flex-1"><div className="font-bold text-slate-700 truncate">{ns.name.replace('LOJA ', '')}</div><div className="text-slate-400 text-xs">{Math.round(ns.distance)} km</div></div>
+                                                                                    {nsStatus.scheduled ? <div className="w-3 h-3 rounded-full bg-red-600 shadow-sm" title="Já agendado"></div> : <div className="w-3 h-3 rounded-full border-2 border-slate-300" title="Pendente"></div>}
+                                                                                </div>
+                                                                            )
+                                                                        })}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            <div className="pt-4 border-t border-red-200 animate-in fade-in zoom-in duration-200">
+                                                                <span className="text-xs text-red-900 font-bold uppercase tracking-wider block mb-3">{status.scheduled ? "Editando Agendamento:" : "Selecione o Transporte:"}</span>
+                                                                <div className="flex gap-3 mb-4" onClick={(e) => e.stopPropagation()}>
+                                                                    <button onClick={() => updateTransport(store.id, 'car')} className={`flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all text-sm font-medium border ${selectedTransport === 'car' ? 'bg-red-800 text-white border-red-800 shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}><Car size={20} className="mb-1" />Carro</button>
+                                                                    <button onClick={() => updateTransport(store.id, 'bus')} className={`flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all text-sm font-medium border ${selectedTransport === 'bus' ? 'bg-red-800 text-white border-red-800 shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}><Bus size={20} className="mb-1" />Ônibus</button>
+                                                                    <button onClick={() => updateTransport(store.id, 'plane')} className={`flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all text-sm font-medium border ${selectedTransport === 'plane' ? 'bg-red-800 text-white border-red-800 shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}><Plane size={20} className="mb-1" />Avião</button>
+                                                                </div>
+                                                                {status.scheduled ? (
+                                                                    <button onClick={(e) => { e.stopPropagation(); removeAssignment(store.id); }} className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 p-3 rounded-lg text-sm font-bold transition-colors"><Trash2 size={18} />Remover Agendamento</button>
+                                                                ) : (<div className="text-xs text-center text-red-500 italic font-medium">Agora clique na data no calendário →</div>)}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {status.scheduled ? <CheckCircle2 size={24} className="text-red-900 shrink-0 ml-2" /> : !isSelected ? <div className="w-5 h-5 rounded-full border-2 border-gray-300 shrink-0 ml-2"></div> : null}
+                                            </div>
+                                            {status.scheduled && <div className="text-sm font-bold text-white mt-2 bg-red-900 inline-block px-3 py-1 rounded-md flex items-center gap-2 shadow-sm"><Check size={14} strokeWidth={3} /><span>Agendado: {status.date?.split('-').reverse().join('/')}</span></div>}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </aside>
+
+                        <main className="flex-1 flex flex-col h-full bg-gray-100 p-4 md:p-6 overflow-hidden">
+                            <div className="flex items-center justify-between mb-4 bg-white p-4 rounded-xl shadow-sm shrink-0 gap-4">
+                                <div className="flex items-center gap-3">
+                                    <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><ChevronLeft className="text-gray-600" size={28} /></button>
+                                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3"><CalendarIcon className="text-red-800" size={32} /><span className="whitespace-nowrap">{monthNames[month]} <span className="text-gray-400 font-light">{year}</span></span></h2>
+                                    <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><ChevronRight className="text-gray-600" size={28} /></button>
+                                </div>
+                                {selectedStoreId && <div className="hidden md:flex items-center gap-3 text-sm bg-red-50 text-red-800 px-4 py-2 rounded-full border border-red-200 animate-in fade-in shadow-sm"><span className="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span><span>Editando: <strong>{stores.find(s => s.id === selectedStoreId)?.name}</strong></span></div>}
+                            </div>
+                            <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col min-h-0">
+                                <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 shrink-0">
+                                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (<div key={day} className="py-3 text-center text-base font-bold text-gray-600 uppercase tracking-wider">{day}</div>))}
+                                </div>
+                                <div className="grid grid-cols-7 auto-rows-fr flex-1 overflow-y-auto">
+                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-50/50 border-r border-b border-gray-100 min-h-[140px]" />))}
+                                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                                        const day = i + 1;
+                                        const dateStr = formatDate(year, month, day);
+                                        const dayAssignments = assignments.filter(a => a.dateStr === dateStr);
+                                        const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+                                        const isTarget = !!selectedStoreId;
+                                        return (
+                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative border-r border-b border-gray-100 p-2 md:p-3 min-h-[160px] transition-colors ${isTarget ? 'cursor-pointer hover:bg-red-50 hover:ring-inset hover:ring-2 hover:ring-red-800' : ''} ${isToday ? 'bg-red-900/5' : ''}`}>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className={`text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full ${isToday ? 'bg-red-800 text-white shadow-md' : 'text-gray-700'}`}>{day}</span>
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    {dayAssignments.map((assign, idx) => {
+                                                        const store = filteredStores.find(s => s.id === assign.storeId);
+                                                        if (!store) return null;
+                                                        const coordColor = store.coordinator === 'JULIETA MATOS' ? 'border-purple-200 bg-purple-50 text-purple-900' : store.coordinator === 'ELITIANE GOMES' ? 'border-orange-200 bg-orange-50 text-orange-900' : 'border-blue-200 bg-blue-50 text-blue-900';
+                                                        const isAssignSelected = selectedStoreId === store.id;
+                                                        const isCompleted = assign.completed;
+                                                        return (
+                                                            <div key={idx} onClick={(e) => { e.stopPropagation(); setSelectedStoreId(store.id); setSelectedTransport(assign.transport); }} title={`Coordenadora: ${store.coordinator} | Transporte: ${getTransportLabel(assign.transport)}\nBalanço: ${store.stats?.lastBalance || '-'}`} className={`text-xs p-2 rounded-lg border shadow-sm relative group cursor-pointer transition-all flex flex-col items-center text-center ${isCompleted ? 'bg-green-700 text-white border-green-800 ring-1 ring-green-600' : `${coordColor} ${isAssignSelected ? 'ring-2 ring-red-800 shadow-lg scale-105 z-10' : 'hover:scale-105 hover:shadow-md'}`}`}>
+                                                                <span className="font-bold text-sm leading-tight w-full break-words">{store.name.replace('LOJA ', '')}</span>
+                                                                <span className={`mt-1 opacity-90 ${isCompleted ? 'text-green-200' : 'text-slate-600'}`}>{getTransportIcon(assign.transport || 'car', 16)}</span>
+                                                                <div className="absolute top-0 right-0 flex opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 rounded-bl-lg shadow-sm border-l border-b border-gray-200">
+                                                                    <button onClick={(e) => { e.stopPropagation(); toggleCompletion(store.id); }} className={`p-1.5 hover:bg-green-100 rounded-bl-lg ${isCompleted ? 'text-green-600' : 'text-gray-400 hover:text-green-600'}`} title={isCompleted ? "Desmarcar" : "Marcar como Concluído"}><Check size={14} strokeWidth={3} /></button>
+                                                                    <button onClick={(e) => { e.stopPropagation(); removeAssignment(store.id); }} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50" title="Remover"><X size={14} /></button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
