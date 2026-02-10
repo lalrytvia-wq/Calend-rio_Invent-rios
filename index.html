@@ -20,6 +20,22 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #991b1b; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #7f1d1d; }
+        
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            animation-name: marquee;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            /* A duração será definida dinamicamente via style inline no React */
+        }
+        .group:hover .animate-marquee {
+            animation-play-state: paused;
+        }
+        
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
@@ -516,6 +532,18 @@ Data,Loja,Coordenadora,Transporte,Status
             const scheduledCount = assignments.length;
             const progress = stores.length > 0 ? (scheduledCount / stores.length) * 100 : 0;
 
+            const tickerAssignments = useMemo(() => {
+                return [...assignments].sort((a,b) => a.dateStr.localeCompare(b.dateStr));
+            }, [assignments]);
+
+            const formatTickerDate = (dateStr) => {
+                const date = new Date(dateStr + 'T12:00:00');
+                const day = String(date.getDate()).padStart(2, '0');
+                const monthName = monthNames[date.getMonth()];
+                const shortYear = String(date.getFullYear()).slice(-2);
+                return `${day} ${monthName} ${shortYear}`;
+            };
+
             const handleFileUpload = (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
@@ -782,6 +810,31 @@ Data,Loja,Coordenadora,Transporte,Status
                                     <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3"><CalendarIcon className="text-red-800" size={32} /><span className="whitespace-nowrap">{monthNames[month]} <span className="text-gray-400 font-light">{year}</span></span></h2>
                                     <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><ChevronRight className="text-gray-600" size={28} /></button>
                                 </div>
+                                
+                                <div className="flex-1 overflow-hidden relative mx-4 group">
+                                    <div className="flex gap-8 animate-marquee whitespace-nowrap" style={{ animationDuration: `${Math.max(40, tickerAssignments.length * 2.5)}s` }}>
+                                        {tickerAssignments.map(assign => {
+                                            const store = stores.find(s => s.id === assign.storeId);
+                                            if (!store) return null;
+                                            
+                                            // Check if completed or date is in the past
+                                            const assignDate = new Date(assign.dateStr + 'T12:00:00');
+                                            const today = new Date();
+                                            today.setHours(0,0,0,0);
+                                            
+                                            const isPast = assignDate < today;
+                                            const isDone = assign.completed || isPast;
+                                            const colorClass = isDone ? 'text-green-800' : 'text-red-700';
+                                            
+                                            return (
+                                                <span key={assign.storeId + assign.dateStr} className={`text-sm font-bold ${colorClass}`}>
+                                                    {store.name.replace('LOJA ', '')} ({formatTickerDate(assign.dateStr)})
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
                                 {selectedStoreId && <div className="hidden md:flex items-center gap-3 text-sm bg-red-50 text-red-800 px-4 py-2 rounded-full border border-red-200 animate-in fade-in shadow-sm"><span className="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span><span>Editando: <strong>{stores.find(s => s.id === selectedStoreId)?.name}</strong></span></div>}
                             </div>
                             <div className="flex-1 bg-white rounded-xl shadow-sm border border-red-900 overflow-hidden flex flex-col min-h-0">
