@@ -16,10 +16,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #991b1b; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #7f1d1d; }
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
@@ -788,8 +788,8 @@ Data,Loja,Coordenadora,Transporte,Status
                                 <div className="grid grid-cols-7 border-b border-red-900 bg-red-900 shrink-0">
                                     {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (<div key={day} className="py-2 text-center text-sm font-bold text-white uppercase tracking-wider">{day}</div>))}
                                 </div>
-                                <div className="grid grid-cols-7 auto-rows-fr flex-1 overflow-y-auto">
-                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-50/50 border-r border-b border-red-900 min-h-[110px]" />))}
+                                <div className="grid grid-cols-7 gap-px bg-red-900 auto-rows-fr flex-1 overflow-y-auto">
+                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-100 h-32 md:h-40" />))}
                                     {Array.from({ length: daysInMonth }).map((_, i) => {
                                         const day = i + 1;
                                         const dateStr = formatDate(year, month, day);
@@ -797,18 +797,18 @@ Data,Loja,Coordenadora,Transporte,Status
                                         const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
                                         const isTarget = !!selectedStoreId;
                                         return (
-                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative border-r border-b border-red-900 p-1 md:p-1 min-h-[110px] flex flex-col gap-1 transition-colors ${isTarget ? 'cursor-pointer hover:bg-red-50 hover:ring-inset hover:ring-2 hover:ring-red-800' : ''} ${isToday ? 'bg-red-50' : ''}`}>
-                                                <div className="flex justify-between items-start">
+                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative h-32 md:h-40 flex flex-col gap-1 transition-colors bg-white ${isTarget ? 'cursor-pointer hover:bg-red-50 ring-inset ring-2 ring-red-800 z-10' : ''} ${isToday ? 'bg-red-50' : ''}`}>
+                                                <div className="flex justify-between items-start p-1 shrink-0">
                                                     <span className={`text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-red-800 text-white shadow-md' : 'text-black'}`}>{day}</span>
                                                 </div>
-                                                <div className="flex-1 flex flex-col gap-1 w-full">
+                                                <div className="flex-1 flex flex-col gap-1 w-full overflow-y-auto custom-scrollbar px-1 pb-1">
                                                     {dayAssignments.map((assign, idx) => {
                                                         const store = filteredStores.find(s => s.id === assign.storeId);
                                                         if (!store) return null;
                                                         const isAssignSelected = selectedStoreId === store.id;
                                                         const isCompleted = assign.completed;
                                                         return (
-                                                            <div key={idx} onClick={(e) => { e.stopPropagation(); setSelectedStoreId(store.id); setSelectedTransport(assign.transport); }} title={`Coordenadora: ${store.coordinator} | Transporte: ${getTransportLabel(assign.transport)}\nBalanço: ${store.stats?.lastBalance || '-'}`} className={`text-[9px] p-1 rounded border shadow-sm relative group cursor-pointer transition-all flex flex-col items-center text-center leading-tight w-full ${isCompleted ? 'bg-green-700 text-white border-green-800 ring-1 ring-green-600' : `bg-pink-200 text-pink-900 border-pink-300 ${isAssignSelected ? 'ring-2 ring-red-800 shadow-lg scale-105 z-10' : 'hover:scale-105 hover:shadow-md'}`}`}>
+                                                            <div key={idx} onClick={(e) => { e.stopPropagation(); setSelectedStoreId(store.id); setSelectedTransport(assign.transport); }} title={`Coordenadora: ${store.coordinator} | Transporte: ${getTransportLabel(assign.transport)}\nBalanço: ${store.stats?.lastBalance || '-'}`} className={`shrink-0 text-[9px] p-1 rounded border shadow-sm relative group cursor-pointer transition-all flex flex-col items-center text-center leading-tight w-full ${isCompleted ? 'bg-green-700 text-white border-green-800 ring-1 ring-green-600' : `bg-pink-200 text-pink-900 border-pink-300 ${isAssignSelected ? 'ring-2 ring-red-800 shadow-lg scale-105 z-10' : 'hover:scale-105 hover:shadow-md'}`}`}>
                                                                 <span className="font-bold w-full break-words line-clamp-2">{store.name.replace('LOJA ', '')}</span>
                                                                 <span className={`mt-0.5 opacity-90 ${isCompleted ? 'text-green-200' : 'text-pink-800'}`}>{getTransportIcon(assign.transport || 'car', 10)}</span>
                                                                 <div className="absolute top-0 right-0 flex opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 rounded-bl-lg shadow-sm border-l border-b border-gray-200">
