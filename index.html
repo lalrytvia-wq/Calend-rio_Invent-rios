@@ -22,20 +22,13 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #991b1b; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #7f1d1d; }
         
-        /* Animação Vertical (De baixo para cima) */
-        @keyframes marquee-vertical {
-            0% { transform: translateY(100%); }
-            100% { transform: translateY(-100%); }
+        /* Animação de Fade para o Slide */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .animate-marquee-vertical {
-            display: block;
-            animation-name: marquee-vertical;
-            animation-timing-function: linear;
-            animation-iteration-count: infinite;
-            will-change: transform; /* Otimização de GPU */
-        }
-        .group:hover .animate-marquee-vertical {
-            animation-play-state: paused;
+        .animate-fade-in-slide {
+            animation: fadeIn 0.5s ease-out forwards;
         }
 
         /* Loading Spinner Styles */
@@ -433,6 +426,7 @@ Data,Loja,Coordenadora,Transporte,Status
             const [searchTerm, setSearchTerm] = useState('');
             const [hoveredStoreId, setHoveredStoreId] = useState(null);
             const [pdfReady, setPdfReady] = useState(false);
+            const [currentTickerIndex, setCurrentTickerIndex] = useState(0);
             const storeRefs = useRef({});
 
             // Remover a tela de carregamento quando o React montar
@@ -442,12 +436,11 @@ Data,Loja,Coordenadora,Transporte,Status
                     setTimeout(() => {
                         loader.style.opacity = '0';
                         loader.style.visibility = 'hidden';
-                    }, 800); // Pequeno delay para garantir que a UI renderizou
+                    }, 800); 
                 }
             }, []);
 
             useEffect(() => {
-                // Initialize jsPDF globally from the UMD loaded in head
                 const checkJsPDF = () => {
                     if (window.jspdf && window.jspdf.jsPDF) {
                         window.jsPDF = window.jspdf.jsPDF;
@@ -455,7 +448,6 @@ Data,Loja,Coordenadora,Transporte,Status
                     }
                 };
                 checkJsPDF();
-                // If it loads later
                 window.onload = checkJsPDF;
             }, []);
             
@@ -553,16 +545,31 @@ Data,Loja,Coordenadora,Transporte,Status
             const scheduledCount = assignments.length;
             const progress = stores.length > 0 ? (scheduledCount / stores.length) * 100 : 0;
 
-            const tickerAssignments = useMemo(() => {
-                return [...assignments].sort((a,b) => a.dateStr.localeCompare(b.dateStr));
+            // --- Lógica do Novo Letreiro (Slide por Mês) ---
+            const tickerGroups = useMemo(() => {
+                const groups = {};
+                assignments.forEach(a => {
+                    const date = new Date(a.dateStr + 'T12:00:00');
+                    const m = date.getMonth();
+                    const y = date.getFullYear();
+                    const key = `${y}-${m}`;
+                    if (!groups[key]) groups[key] = { year: y, month: m, items: [] };
+                    groups[key].items.push(a);
+                });
+                // Converter para array e ordenar cronologicamente
+                return Object.values(groups).sort((a,b) => (a.year - b.year) || (a.month - b.month));
             }, [assignments]);
 
-            const formatTickerDate = (dateStr) => {
-                const date = new Date(dateStr + 'T12:00:00');
-                const day = String(date.getDate()).padStart(2, '0');
-                const monthName = monthNames[date.getMonth()];
-                const shortYear = String(date.getFullYear()).slice(-2);
-                return `${day} ${monthName} ${shortYear}`;
+            useEffect(() => {
+                if (tickerGroups.length === 0) return;
+                const interval = setInterval(() => {
+                    setCurrentTickerIndex(prev => (prev + 1) % tickerGroups.length);
+                }, 5000); // 5 segundos
+                return () => clearInterval(interval);
+            }, [tickerGroups.length]);
+
+            const formatDayOnly = (dateStr) => {
+                return dateStr.split('-')[2];
             };
 
             const handleFileUpload = (e) => {
@@ -832,32 +839,27 @@ Data,Loja,Coordenadora,Transporte,Status
                                     <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><ChevronRight className="text-gray-600" size={28} /></button>
                                 </div>
                                 
-                                <div className="flex-1 overflow-hidden relative mx-4 h-12 flex items-center bg-black/20 rounded-lg px-2">
-                                    <div className="w-full animate-marquee-vertical text-center space-y-2" style={{ animationDuration: `${Math.max(10, tickerAssignments.length * 0.2)}s` }}>
-                                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-1">
-                                            {tickerAssignments.map(assign => {
-                                                const store = stores.find(s => s.id === assign.storeId);
-                                                if (!store) return null;
-                                                
-                                                const assignDate = new Date(assign.dateStr + 'T12:00:00');
-                                                const today = new Date();
-                                                today.setHours(0,0,0,0);
-                                                
-                                                const isPast = assignDate < today;
-                                                const isDone = assign.completed || isPast;
-                                                const colorClass = isDone ? 'text-green-800' : 'text-red-700';
-                                                
-                                                return (
-                                                    <span key={assign.storeId + assign.dateStr} className={`text-sm font-bold ${colorClass} whitespace-nowrap`}>
-                                                        {store.name.replace('LOJA ', '')} ({formatTickerDate(assign.dateStr)})
-                                                    </span>
-                                                );
-                                            })}
+                                <div className="flex-1 overflow-hidden relative mx-4 h-12 flex items-center bg-white rounded-lg px-2 border border-gray-200">
+                                    {tickerGroups.length > 0 && (
+                                        <div key={currentTickerIndex} className="w-full animate-fade-in-slide flex items-center gap-2 overflow-hidden">
+                                            <span className="text-red-900 font-bold uppercase whitespace-nowrap px-2 py-1 bg-red-50 rounded-md text-xs border border-red-100">
+                                                {monthNames[tickerGroups[currentTickerIndex].month]}
+                                            </span>
+                                            <div className="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-1">
+                                                {tickerGroups[currentTickerIndex].items.map((assign, idx) => {
+                                                     const store = stores.find(s => s.id === assign.storeId);
+                                                     if (!store) return null;
+                                                     return (
+                                                         <span key={idx} className="text-sm font-semibold text-gray-700 whitespace-nowrap flex items-center gap-1">
+                                                             {store.name.replace('LOJA ', '')} <span className="text-xs text-gray-400 font-normal">({formatDayOnly(assign.dateStr)})</span>
+                                                             {idx < tickerGroups[currentTickerIndex].items.length - 1 && <span className="text-gray-300 mx-1">•</span>}
+                                                         </span>
+                                                     );
+                                                })}
+                                            </div>
                                         </div>
-                                        {/* Duplicando conteúdo para preencher espaço vazio na animação vertical se necessário, 
-                                            mas para simplificar e performance, deixamos apenas o scroll normal. 
-                                            O bloco vai subir até desaparecer e depois reiniciar. */}
-                                    </div>
+                                    )}
+                                    {tickerGroups.length === 0 && <span className="text-gray-400 text-sm italic w-full text-center">Nenhum agendamento encontrado.</span>}
                                 </div>
 
                                 {selectedStoreId && <div className="hidden md:flex items-center gap-3 text-sm bg-red-50 text-red-800 px-4 py-2 rounded-full border border-red-200 animate-in fade-in shadow-sm"><span className="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span><span>Editando: <strong>{stores.find(s => s.id === selectedStoreId)?.name}</strong></span></div>}
