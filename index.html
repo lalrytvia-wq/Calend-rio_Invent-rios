@@ -22,20 +22,19 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #991b1b; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #7f1d1d; }
         
-        /* Otimizações de Performance do Letreiro (GPU Acceleration) */
-        @keyframes marquee {
-            0% { transform: translate3d(100%, 0, 0); }
-            100% { transform: translate3d(-100%, 0, 0); }
+        /* Animação Vertical (De baixo para cima) */
+        @keyframes marquee-vertical {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
         }
-        .animate-marquee {
-            display: inline-block;
-            animation-name: marquee;
+        .animate-marquee-vertical {
+            display: block;
+            animation-name: marquee-vertical;
             animation-timing-function: linear;
             animation-iteration-count: infinite;
-            white-space: nowrap;
-            will-change: transform; /* Informa ao navegador para preparar a GPU */
+            will-change: transform; /* Otimização de GPU */
         }
-        .group:hover .animate-marquee {
+        .group:hover .animate-marquee-vertical {
             animation-play-state: paused;
         }
 
@@ -833,27 +832,31 @@ Data,Loja,Coordenadora,Transporte,Status
                                     <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><ChevronRight className="text-gray-600" size={28} /></button>
                                 </div>
                                 
-                                <div className="flex-1 overflow-hidden relative mx-4 group">
-                                    <div className="flex gap-8 animate-marquee whitespace-nowrap" style={{ animationDuration: `${Math.max(5, tickerAssignments.length * 0.4)}s` }}>
-                                        {tickerAssignments.map(assign => {
-                                            const store = stores.find(s => s.id === assign.storeId);
-                                            if (!store) return null;
-                                            
-                                            // Check if completed or date is in the past
-                                            const assignDate = new Date(assign.dateStr + 'T12:00:00');
-                                            const today = new Date();
-                                            today.setHours(0,0,0,0);
-                                            
-                                            const isPast = assignDate < today;
-                                            const isDone = assign.completed || isPast;
-                                            const colorClass = isDone ? 'text-green-800' : 'text-red-700';
-                                            
-                                            return (
-                                                <span key={assign.storeId + assign.dateStr} className={`text-sm font-bold ${colorClass}`}>
-                                                    {store.name.replace('LOJA ', '')} ({formatTickerDate(assign.dateStr)})
-                                                </span>
-                                            );
-                                        })}
+                                <div className="flex-1 overflow-hidden relative mx-4 h-12 flex items-center bg-black/20 rounded-lg px-2">
+                                    <div className="w-full animate-marquee-vertical text-center space-y-2" style={{ animationDuration: `${Math.max(10, tickerAssignments.length * 0.2)}s` }}>
+                                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-1">
+                                            {tickerAssignments.map(assign => {
+                                                const store = stores.find(s => s.id === assign.storeId);
+                                                if (!store) return null;
+                                                
+                                                const assignDate = new Date(assign.dateStr + 'T12:00:00');
+                                                const today = new Date();
+                                                today.setHours(0,0,0,0);
+                                                
+                                                const isPast = assignDate < today;
+                                                const isDone = assign.completed || isPast;
+                                                const colorClass = isDone ? 'text-green-800' : 'text-red-700';
+                                                
+                                                return (
+                                                    <span key={assign.storeId + assign.dateStr} className={`text-sm font-bold ${colorClass} whitespace-nowrap`}>
+                                                        {store.name.replace('LOJA ', '')} ({formatTickerDate(assign.dateStr)})
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                        {/* Duplicando conteúdo para preencher espaço vazio na animação vertical se necessário, 
+                                            mas para simplificar e performance, deixamos apenas o scroll normal. 
+                                            O bloco vai subir até desaparecer e depois reiniciar. */}
                                     </div>
                                 </div>
 
