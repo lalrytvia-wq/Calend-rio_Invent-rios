@@ -812,7 +812,7 @@ Data,Loja,Coordenadora,Transporte,Status
                                 </div>
                                 
                                 <div className="flex-1 overflow-hidden relative mx-4 group">
-                                    <div className="flex gap-8 animate-marquee whitespace-nowrap" style={{ animationDuration: `${Math.max(40, tickerAssignments.length * 2.5)}s` }}>
+                                    <div className="flex gap-8 animate-marquee whitespace-nowrap" style={{ animationDuration: `${Math.max(5, tickerAssignments.length * 0.4)}s` }}>
                                         {tickerAssignments.map(assign => {
                                             const store = stores.find(s => s.id === assign.storeId);
                                             if (!store) return null;
