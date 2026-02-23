@@ -71,7 +71,7 @@
         import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
         import { 
             Calendar as CalendarIcon, ChevronLeft, ChevronRight, Upload, Printer, Store, User, Search, 
-            CheckCircle2, X, Car, Bus, Plane, Database, TrendingUp, History, Trash2, AlertTriangle, Route, MapPin, Check 
+            CheckCircle2, X, Car, Bus, Plane, Database, TrendingUp, History, Trash2, AlertTriangle, Route, MapPin, Check, Save 
         } from 'https://esm.sh/lucide-react@0.344.0';
 
         // --- DADOS E CONSTANTES ---
@@ -132,6 +132,30 @@
             "ARAPIRACA 02": "ARAPIRACA 2",
             "ARAPIRACA 01": "ARAPIRACA 1",
         };
+
+        const HOLIDAYS_2026 = [
+            { date: '2026-01-01', name: 'Confraternização Universal', type: 'Nacional' },
+            { date: '2026-02-17', name: 'Carnaval', type: 'Nacional' },
+            { date: '2026-03-06', name: 'Data Magna (PE)', type: 'Estadual (PE)' },
+            { date: '2026-03-25', name: 'Data Magna (CE)', type: 'Estadual (CE)' },
+            { date: '2026-04-03', name: 'Sexta-feira Santa', type: 'Nacional' },
+            { date: '2026-04-21', name: 'Tiradentes / Fundação BSB', type: 'Nacional/DF' },
+            { date: '2026-05-01', name: 'Dia do Trabalho', type: 'Nacional' },
+            { date: '2026-06-04', name: 'Corpus Christi', type: 'Nacional' },
+            { date: '2026-07-02', name: 'Independência da Bahia', type: 'Estadual (BA)' },
+            { date: '2026-07-08', name: 'Emancipação de Sergipe', type: 'Estadual (SE)' },
+            { date: '2026-07-28', name: 'Adesão à Independência', type: 'Estadual (MA)' },
+            { date: '2026-08-05', name: 'Fundação do Estado', type: 'Estadual (PB)' },
+            { date: '2026-08-15', name: 'Adesão à Independência', type: 'Estadual (PA)' },
+            { date: '2026-09-07', name: 'Independência do Brasil', type: 'Nacional' },
+            { date: '2026-09-16', name: 'Emancipação Política', type: 'Estadual (AL)' },
+            { date: '2026-10-03', name: 'Mártires Cunhaú/Uruaçu', type: 'Estadual (RN)' },
+            { date: '2026-10-12', name: 'Nossa Sra. Aparecida', type: 'Nacional' },
+            { date: '2026-10-19', name: 'Dia do Piauí', type: 'Estadual (PI)' },
+            { date: '2026-11-02', name: 'Finados', type: 'Nacional' },
+            { date: '2026-11-15', name: 'Proclamação da República', type: 'Nacional' },
+            { date: '2026-12-25', name: 'Natal', type: 'Nacional' }
+        ];
 
         const INITIAL_RAW_DATA = `
 JULIETA MATOS
@@ -206,15 +230,17 @@ LL,CICLO,LOJAS,ACURACIDADE
 
         const INITIAL_SCHEDULE_CSV = `
 Data,Loja,Coordenadora,Transporte,Status
-2026-03-02,LOJA PATOS,JULIETA MATOS,Carro,PENDENTE
-2026-03-03,LOJA PAULO AFONSO 1,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-03-04,LOJA ALAGOINHAS,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-03-05,LOJA FEIRA DE SANTANA 1,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-03-09,LOJA BR,JULIETA MATOS,Carro,PENDENTE
-2026-03-10,LOJA DIAMANTES CENTRO,JULIETA MATOS,Carro,PENDENTE
-2026-03-11,LOJA TELEDIGITAL,JULIETA MATOS,Carro,PENDENTE
-2026-01-13,LOJA GARANHUNS,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-01-14,LOJA CARUARU,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-01-13,LOJA GARANHUNS,LUCIANA OLIVEIRA,Carro,CONCLUIDO
+2026-01-14,LOJA CARUARU,LUCIANA OLIVEIRA,Carro,CONCLUIDO
+2026-03-03,LOJA BR,JULIETA MATOS,Carro,PENDENTE
+2026-03-03,LOJA ARACAJU 1,LUCIANA OLIVEIRA,Avião,PENDENTE
+2026-03-04,LOJA DIAMANTES CENTRO,JULIETA MATOS,Carro,PENDENTE
+2026-03-05,LOJA TELEDIGITAL,JULIETA MATOS,Carro,PENDENTE
+2026-03-10,LOJA PATOS,JULIETA MATOS,Carro,PENDENTE
+2026-03-11,LOJA PAULO AFONSO 1,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-03-12,LOJA ALAGOINHAS,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-03-13,LOJA FEIRA DE SANTANA 1,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-04-02,LOJA BRASILIA,LUCIANA OLIVEIRA,Avião,PENDENTE
 2026-04-06,LOJA IMPERATRIZ,ELITIANE GOMES,Carro,PENDENTE
 2026-04-07,LOJA ACAILANDIA,ELITIANE GOMES,Carro,PENDENTE
 2026-04-08,LOJA MARABA,ELITIANE GOMES,Carro,PENDENTE
@@ -223,41 +249,37 @@ Data,Loja,Coordenadora,Transporte,Status
 2026-05-05,LOJA JOAO PESSOA 2,JULIETA MATOS,Carro,PENDENTE
 2026-05-06,LOJA JOAO PESSOA 3,JULIETA MATOS,Carro,PENDENTE
 2026-05-07,LOJA JOAO PESSOA 4,JULIETA MATOS,Carro,PENDENTE
-2026-05-13,LOJA BRASILIA,LUCIANA OLIVEIRA,Avião,PENDENTE
-2026-06-02,LOJA MACEIO 2,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-06-03,LOJA MACEIO 3,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-06-05,LOJA ARAPIRACA 2,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-06-04,LOJA ARAPIRACA 1,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-07-07,LOJA TERESINA 3,JULIETA MATOS,Carro,PENDENTE
-2026-07-08,LOJA TERESINA 4,JULIETA MATOS,Carro,PENDENTE
-2026-07-09,LOJA TERESINA 5,JULIETA MATOS,Carro,PENDENTE
-2026-07-06,LOJA PICOS,JULIETA MATOS,Carro,PENDENTE
-2026-07-10,LOJA PARNAIBA,JULIETA MATOS,Carro,PENDENTE
-2026-07-14,LOJA FORTALEZA 1,JULIETA MATOS,Carro,PENDENTE
-2026-07-15,LOJA FORTALEZA 5,JULIETA MATOS,Carro,PENDENTE
-2026-08-04,LOJA ARACAJU 1,LUCIANA OLIVEIRA,Avião,PENDENTE
-2026-08-05,LOJA ARACAJU 3,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-08-06,LOJA ITABAIANA,LUCIANA OLIVEIRA,Carro,PENDENTE
-2026-09-07,LOJA PINHEIRO,ELITIANE GOMES,Carro,PENDENTE
-2026-09-08,LOJA SAO LUIS 1,ELITIANE GOMES,Carro,PENDENTE
-2026-09-09,LOJA SAO LUIS 2,ELITIANE GOMES,Carro,PENDENTE
-2026-09-10,LOJA SAO LUIS 3,ELITIANE GOMES,Carro,PENDENTE
-2026-09-11,LOJA SAO LUIS 4,ELITIANE GOMES,Carro,PENDENTE
-2026-10-07,LOJA PEDREIRAS,ELITIANE GOMES,Carro,PENDENTE
-2026-10-06,LOJA PRESIDENTE DUTRA,ELITIANE GOMES,Carro,PENDENTE
-2026-10-09,LOJA SANTA INES,ELITIANE GOMES,Carro,PENDENTE
-2026-10-08,LOJA BACABAL 1,ELITIANE GOMES,Carro,PENDENTE
-2026-10-20,LOJA BELEM 1,ELITIANE GOMES,Avião,PENDENTE
-2026-10-21,LOJA BELEM 2,ELITIANE GOMES,Avião,PENDENTE
-2026-10-22,LOJA CASTANHAL,ELITIANE GOMES,Carro,PENDENTE
-2026-07-14,LOJA VILA UNIAO,JULIETA MATOS,Carro,PENDENTE
-2026-07-15,LOJA MARAPONGA,JULIETA MATOS,Carro,PENDENTE
-2026-11-06,LOJA CAMPINA GRANDE,JULIETA MATOS,Carro,PENDENTE
-2026-11-02,LOJA NATAL 3,JULIETA MATOS,Carro,PENDENTE
-2026-11-03,LOJA NATAL 1,JULIETA MATOS,Carro,PENDENTE
-2026-11-04,LOJA SANTA RITA,JULIETA MATOS,Carro,PENDENTE
-2026-11-05,LOJA PARNAMIRIM,JULIETA MATOS,Carro,PENDENTE
-2026-07-16,LOJA MOSSORO,JULIETA MATOS,Carro,PENDENTE
+2026-05-11,LOJA MACEIO 2,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-05-12,LOJA MACEIO 3,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-05-13,LOJA ARAPIRACA 1,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-05-14,LOJA ARAPIRACA 2,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-06-08,LOJA PICOS,JULIETA MATOS,Carro,PENDENTE
+2026-06-09,LOJA TERESINA 3,JULIETA MATOS,Carro,PENDENTE
+2026-06-10,LOJA TERESINA 4,JULIETA MATOS,Carro,PENDENTE
+2026-06-11,LOJA TERESINA 5,JULIETA MATOS,Carro,PENDENTE
+2026-06-12,LOJA PARNAIBA,JULIETA MATOS,Carro,PENDENTE
+2026-06-15,LOJA VILA UNIAO,JULIETA MATOS,Carro,PENDENTE
+2026-06-16,LOJA MARAPONGA,JULIETA MATOS,Carro,PENDENTE
+2026-06-18,LOJA ARACAJU 3,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-06-19,LOJA ITABAIANA,LUCIANA OLIVEIRA,Carro,PENDENTE
+2026-08-10,LOJA PINHEIRO,ELITIANE GOMES,Carro,PENDENTE
+2026-08-11,LOJA SAO LUIS 1,ELITIANE GOMES,Carro,PENDENTE
+2026-08-12,LOJA SAO LUIS 2,ELITIANE GOMES,Carro,PENDENTE
+2026-08-13,LOJA SAO LUIS 3,ELITIANE GOMES,Carro,PENDENTE
+2026-08-14,LOJA SAO LUIS 4,ELITIANE GOMES,Carro,PENDENTE
+2026-08-18,LOJA PRESIDENTE DUTRA,ELITIANE GOMES,Carro,PENDENTE
+2026-08-19,LOJA PEDREIRAS,ELITIANE GOMES,Carro,PENDENTE
+2026-08-20,LOJA BACABAL 1,ELITIANE GOMES,Carro,PENDENTE
+2026-08-21,LOJA SANTA INES,ELITIANE GOMES,Carro,PENDENTE
+2026-09-01,LOJA BELEM 1,ELITIANE GOMES,Avião,PENDENTE
+2026-09-02,LOJA BELEM 2,ELITIANE GOMES,Avião,PENDENTE
+2026-09-03,LOJA CASTANHAL,ELITIANE GOMES,Carro,PENDENTE
+2026-09-14,LOJA MOSSORO,JULIETA MATOS,Carro,PENDENTE
+2026-09-15,LOJA NATAL 3,JULIETA MATOS,Carro,PENDENTE
+2026-09-16,LOJA NATAL 1,JULIETA MATOS,Carro,PENDENTE
+2026-09-17,LOJA SANTA RITA,JULIETA MATOS,Carro,PENDENTE
+2026-09-18,LOJA PARNAMIRIM,JULIETA MATOS,Carro,PENDENTE
+2026-09-19,LOJA CAMPINA GRANDE,JULIETA MATOS,Carro,PENDENTE
 `;
 
         // --- FUNÇÕES UTILITÁRIAS ---
@@ -384,7 +406,7 @@ Data,Loja,Coordenadora,Transporte,Status
                     let transport = 'car';
                     if (rawTransport && (rawTransport.includes('avi') || rawTransport.includes('plane'))) transport = 'plane';
                     else if (rawTransport && (rawTransport.includes('bus') || rawTransport.includes('oni'))) transport = 'bus';
-                    const isCompleted = rawStatus === 'CONCLUIDO' || rawStatus === 'REALIZADO';
+                    const isCompleted = rawStatus === 'CONCLUIDO' || rawStatus === 'REALIZADO' || rawStatus === 'CONCLUÍDO';
                     assignments.push({ storeId: match.id, dateStr: dateStr, transport: transport, completed: isCompleted });
                 }
             }
@@ -422,7 +444,6 @@ Data,Loja,Coordenadora,Transporte,Status
             const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 1)); 
             const [selectedStoreId, setSelectedStoreId] = useState(null);
             const [selectedTransport, setSelectedTransport] = useState('car');
-            const [filterCoord, setFilterCoord] = useState('all');
             const [searchTerm, setSearchTerm] = useState('');
             const [hoveredStoreId, setHoveredStoreId] = useState(null);
             const [pdfReady, setPdfReady] = useState(false);
@@ -458,7 +479,7 @@ Data,Loja,Coordenadora,Transporte,Status
                 setStats(loadedStats);
                 const defaultAssignments = parseScheduleCSV(INITIAL_SCHEDULE_CSV, loadedStores);
 
-                const savedAssign = localStorage.getItem('diamantes_inventory_assignments_v11');
+                const savedAssign = localStorage.getItem('diamantes_inventory_assignments_v14');
                 if (savedAssign) {
                     const parsed = JSON.parse(savedAssign);
                     if (parsed.length > 0) {
@@ -483,7 +504,7 @@ Data,Loja,Coordenadora,Transporte,Status
             }, []);
 
             useEffect(() => {
-                localStorage.setItem('diamantes_inventory_assignments_v11', JSON.stringify(assignments));
+                localStorage.setItem('diamantes_inventory_assignments_v14', JSON.stringify(assignments));
             }, [assignments]);
 
             useEffect(() => {
@@ -503,11 +524,6 @@ Data,Loja,Coordenadora,Transporte,Status
             
             const monthNames = [ "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro" ];
 
-            const coordinators = useMemo(() => {
-                const coords = new Set(stores.map(s => s.coordinator));
-                return Array.from(coords).sort();
-            }, [stores]);
-
             const getStoreStatus = (id) => {
                 const assign = assignments.find(a => a.storeId === id);
                 return assign ? { scheduled: true, date: assign.dateStr } : { scheduled: false, date: null };
@@ -519,11 +535,12 @@ Data,Loja,Coordenadora,Transporte,Status
                     const storeStat = stats[key];
                     return { ...store, stats: storeStat };
                 }).filter(store => {
-                    const matchesSearch = store.name.toLowerCase().includes(searchTerm.toLowerCase());
-                    const matchesCoord = filterCoord === 'all' || store.coordinator === filterCoord;
-                    return matchesSearch && matchesCoord;
+                    const search = searchTerm.toLowerCase();
+                    const matchesSearch = store.name.toLowerCase().includes(search) || 
+                                          store.coordinator.toLowerCase().includes(search);
+                    return matchesSearch;
                 });
-            }, [stores, stats, searchTerm, filterCoord]);
+            }, [stores, stats, searchTerm]);
 
             const nearbyStores = useMemo(() => {
                 if (!selectedStoreId) return [];
@@ -542,9 +559,6 @@ Data,Loja,Coordenadora,Transporte,Status
                     .sort((a, b) => a.distance - b.distance); 
             }, [selectedStoreId, stores]);
 
-            const scheduledCount = assignments.length;
-            const progress = stores.length > 0 ? (scheduledCount / stores.length) * 100 : 0;
-
             // --- Lógica do Novo Letreiro (Slide por Mês) ---
             const tickerGroups = useMemo(() => {
                 const groups = {};
@@ -556,7 +570,6 @@ Data,Loja,Coordenadora,Transporte,Status
                     if (!groups[key]) groups[key] = { year: y, month: m, items: [] };
                     groups[key].items.push(a);
                 });
-                // Converter para array e ordenar cronologicamente
                 return Object.values(groups).sort((a,b) => (a.year - b.year) || (a.month - b.month));
             }, [assignments]);
 
@@ -570,36 +583,6 @@ Data,Loja,Coordenadora,Transporte,Status
 
             const formatDayOnly = (dateStr) => {
                 return dateStr.split('-')[2];
-            };
-
-            const handleFileUpload = (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const text = event.target?.result;
-                    const isDatabase = text.toUpperCase().includes('ACURACIDADE') || text.toUpperCase().includes('LL');
-                    if (isDatabase) {
-                        const newStats = parseIndicators(text);
-                        if (Object.keys(newStats).length > 0 && confirm(`Encontrados dados de ${Object.keys(newStats).length} lojas. Atualizar?`)) {
-                            setStats(prev => ({ ...prev, ...newStats }));
-                        }
-                    } else {
-                        if (text.includes('Data') && text.includes('Loja')) {
-                            const newAssigns = parseScheduleCSV(text, stores);
-                            if (newAssigns.length > 0 && confirm(`Carregar ${newAssigns.length} agendamentos?`)) {
-                                setAssignments(newAssigns);
-                            }
-                        } else {
-                            const parsed = parseStoreList(text);
-                            if (parsed.length > 0 && confirm(`Substituir lista por ${parsed.length} lojas?`)) {
-                                setStores(parsed);
-                                setAssignments([]); 
-                            }
-                        }
-                    }
-                };
-                reader.readAsText(file);
             };
 
             const handleDateClick = (day) => {
@@ -655,11 +638,16 @@ Data,Loja,Coordenadora,Transporte,Status
                 document.body.removeChild(link);
             };
 
+            // --- NOVA FUNÇÃO DE EXPORTAÇÃO PDF COM TABELA E CALENDÁRIO VISUAL ---
             const handleExportPDF = () => {
                 if (!pdfReady || !window.jsPDF) { alert("Aguarde, carregando biblioteca de PDF..."); return; }
                 try {
                     const doc = new window.jsPDF();
-                    doc.setFillColor(153, 27, 27);
+
+                    // =========================================================
+                    // PÁGINA 1: TABELA DE CRONOGRAMA DE INVENTÁRIOS
+                    // =========================================================
+                    doc.setFillColor(153, 27, 27); // Vermelho Escuro (#991b1b)
                     doc.rect(0, 0, 210, 20, 'F');
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(16);
@@ -702,6 +690,129 @@ Data,Loja,Coordenadora,Transporte,Status
                         styles: { fontSize: 8, cellPadding: 2, lineColor: [200, 200, 200] },
                         alternateRowStyles: { fillColor: [255, 241, 242] },
                     });
+
+                    // =========================================================
+                    // PÁGINAS SEGUINTES: CALENDÁRIO MENSAL VISUAL
+                    // =========================================================
+                    const monthGroups = {};
+                    sortedAssignments.forEach(a => {
+                        const date = new Date(a.dateStr + 'T12:00:00');
+                        const y = date.getFullYear();
+                        const m = date.getMonth();
+                        const key = `${y}-${m}`;
+                        
+                        if (!monthGroups[key]) monthGroups[key] = { year: y, month: m, days: {} };
+                        
+                        const day = date.getDate();
+                        if (!monthGroups[key].days[day]) monthGroups[key].days[day] = [];
+                        monthGroups[key].days[day].push(a);
+                    });
+
+                    let sortedMonths = Object.values(monthGroups).sort((a,b) => a.year - b.year || a.month - b.month);
+                    if (sortedMonths.length === 0) {
+                        sortedMonths = [{ year: currentDate.getFullYear(), month: currentDate.getMonth(), days: {} }];
+                    }
+
+                    sortedMonths.forEach(group => {
+                        doc.addPage(); 
+
+                        doc.setFillColor(153, 27, 27);
+                        doc.rect(0, 0, 210, 20, 'F');
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(16);
+                        doc.setFont("helvetica", "bold");
+                        const monthTitle = `${monthNames[group.month]} ${group.year}`;
+                        doc.text(monthTitle, 105, 13, { align: "center" });
+
+                        const daysInMonthTotal = new Date(group.year, group.month + 1, 0).getDate();
+                        const firstDayOfWeek = new Date(group.year, group.month, 1).getDay(); 
+                        
+                        const calRows = [];
+                        let currentWeek = Array(7).fill({ content: '', styles: { fillColor: [250, 250, 250] } });
+                        let currentDayPos = firstDayOfWeek;
+
+                        for(let day = 1; day <= daysInMonthTotal; day++) {
+                            let isAssigned = false;
+                            let cellText = `${day}`; 
+
+                            const dateStrPDF = `${group.year}-${String(group.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            const pdfDayHolidays = HOLIDAYS_2026.filter(h => h.date === dateStrPDF);
+
+                            if (pdfDayHolidays.length > 0) {
+                                cellText += `\n\n[FERIADO]\n${pdfDayHolidays.map(h => h.name).join(' / ')}`;
+                            }
+
+                            if (group.days[day]) {
+                                isAssigned = true;
+                                group.days[day].forEach(assign => {
+                                    const store = stores.find(s => s.id === assign.storeId);
+                                    if(store) {
+                                        const cleanStoreName = store.name.replace('LOJA ', '');
+                                        const shortCoord = store.coordinator.split(' ')[0]; 
+                                        cellText += `\n\n${cleanStoreName}\n(${shortCoord})`;
+                                    }
+                                });
+                            }
+
+                            let cellFillColor = [255, 255, 255];
+                            if (isAssigned) {
+                                cellFillColor = [254, 226, 226]; // Inventário: Fundo Vermelho Claro
+                            } else if (pdfDayHolidays.length > 0) {
+                                cellFillColor = [239, 246, 255]; // Feriado (sem inventário): Fundo Azul muito claro
+                            }
+
+                            currentWeek[currentDayPos] = {
+                                content: cellText,
+                                styles: { fillColor: cellFillColor }
+                            };
+
+                            currentDayPos++;
+                            
+                            if(currentDayPos > 6) {
+                                calRows.push(currentWeek);
+                                currentWeek = Array(7).fill({ content: '', styles: { fillColor: [250, 250, 250] } });
+                                currentDayPos = 0;
+                            }
+                        }
+                        
+                        if(currentDayPos > 0) {
+                            calRows.push(currentWeek);
+                        }
+
+                        doc.autoTable({
+                            startY: 25,
+                            head: [['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB']],
+                            body: calRows,
+                            theme: 'grid',
+                            headStyles: { 
+                                fillColor: [153, 27, 27], 
+                                textColor: [255, 255, 255], 
+                                halign: 'center', 
+                                fontStyle: 'bold',
+                                fontSize: 10
+                            },
+                            styles: { 
+                                valign: 'top', 
+                                halign: 'left', 
+                                fontSize: 7, 
+                                font: 'helvetica',
+                                lineColor: [200, 200, 200], 
+                                lineWidth: 0.2,
+                                minCellHeight: 35, 
+                                overflow: 'linebreak'
+                            },
+                            columnStyles: {
+                                0: { cellWidth: 26 },
+                                1: { cellWidth: 26 },
+                                2: { cellWidth: 26 },
+                                3: { cellWidth: 26 },
+                                4: { cellWidth: 26 },
+                                5: { cellWidth: 26 },
+                                6: { cellWidth: 26 }
+                            }
+                        });
+                    });
+
                     doc.save("cronograma_diamantes_2026.pdf");
                 } catch (err) { console.error(err); alert("Erro ao gerar PDF."); }
             };
@@ -723,6 +834,9 @@ Data,Loja,Coordenadora,Transporte,Status
                         </div>
                         <div className="flex items-center gap-6">
                             <div className="flex gap-3">
+                                <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 bg-red-800 text-white hover:bg-red-700 rounded-lg transition-all text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 border border-white/20">
+                                    <Save size={18} /> Salvar
+                                </button>
                                 <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white text-red-900 hover:bg-red-50 rounded-lg transition-all text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
                                     <Printer size={18} /> Exportar PDF
                                 </button>
@@ -731,24 +845,18 @@ Data,Loja,Coordenadora,Transporte,Status
                     </header>
 
                     <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-                        <aside className="w-full md:w-[280px] bg-white border-r border-gray-200 flex flex-col h-full shrink-0 z-20 shadow-sm md:shadow-none">
+                        <aside className="w-full md:w-[240px] bg-white border-r border-gray-200 flex flex-col h-full shrink-0 z-20 shadow-sm md:shadow-none">
                             <div className="p-4 border-b border-gray-100 space-y-4 bg-white shrink-0">
                                 <div className="relative">
                                     <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
-                                    <input type="text" placeholder="Buscar loja..." className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-800" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Buscar loja ou coordenadora..." 
+                                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-800" 
+                                        value={searchTerm} 
+                                        onChange={(e) => setSearchTerm(e.target.value)} 
+                                    />
                                 </div>
-                                <select className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-800" value={filterCoord} onChange={(e) => setFilterCoord(e.target.value)}>
-                                    <option value="all">Todas as Coordenadoras</option>
-                                    {coordinators.map(c => (<option key={c} value={c}>{c}</option>))}
-                                </select>
-                                <label className="flex items-center gap-3 p-4 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:bg-red-50 hover:border-red-800 transition-colors group">
-                                    <Database size={24} className="text-gray-400 group-hover:text-red-800" />
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-semibold text-gray-600 group-hover:text-red-900">Importar Arquivo</span>
-                                        <span className="text-xs text-gray-400">Suporta Lista de Lojas ou CSV do Banco de Dados</span>
-                                    </div>
-                                    <input type="file" accept=".csv,.txt" className="hidden" onChange={handleFileUpload} />
-                                </label>
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 space-y-3">
                                 <h3 className="text-sm font-bold text-gray-500 uppercase px-1 mb-3">Lojas Disponíveis</h3>
@@ -849,8 +957,17 @@ Data,Loja,Coordenadora,Transporte,Status
                                                 {tickerGroups[currentTickerIndex].items.map((assign, idx) => {
                                                      const store = stores.find(s => s.id === assign.storeId);
                                                      if (!store) return null;
+                                                     
+                                                     const assignDate = new Date(assign.dateStr + 'T12:00:00');
+                                                     const today = new Date();
+                                                     today.setHours(0,0,0,0);
+                                                     
+                                                     const isPast = assignDate < today;
+                                                     const isDone = assign.completed || isPast;
+                                                     const colorClass = isDone ? 'text-green-800' : 'text-red-700';
+                                                     
                                                      return (
-                                                         <span key={idx} className="text-sm font-semibold text-gray-700 whitespace-nowrap flex items-center gap-1">
+                                                         <span key={idx} className={`text-sm font-bold ${colorClass} whitespace-nowrap flex items-center gap-1`}>
                                                              {store.name.replace('LOJA ', '')} <span className="text-xs text-gray-400 font-normal">({formatDayOnly(assign.dateStr)})</span>
                                                              {idx < tickerGroups[currentTickerIndex].items.length - 1 && <span className="text-gray-300 mx-1">•</span>}
                                                          </span>
@@ -865,23 +982,31 @@ Data,Loja,Coordenadora,Transporte,Status
                                 {selectedStoreId && <div className="hidden md:flex items-center gap-3 text-sm bg-red-50 text-red-800 px-4 py-2 rounded-full border border-red-200 animate-in fade-in shadow-sm"><span className="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span><span>Editando: <strong>{stores.find(s => s.id === selectedStoreId)?.name}</strong></span></div>}
                             </div>
                             <div className="flex-1 bg-white rounded-xl shadow-sm border border-red-900 overflow-hidden flex flex-col min-h-0">
-                                <div className="grid grid-cols-7 border-b border-red-900 bg-red-900 shrink-0">
-                                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (<div key={day} className="py-2 text-center text-sm font-bold text-white uppercase tracking-wider">{day}</div>))}
-                                </div>
-                                <div className="grid grid-cols-7 gap-px bg-red-900 auto-rows-fr flex-1 overflow-y-auto">
-                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-100 h-32 md:h-40" />))}
+                                <div className="grid grid-cols-7 bg-white h-full border-t border-l border-gray-300 overflow-y-auto custom-scrollbar content-start">
+                                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (<div key={day} className="sticky top-0 z-20 py-2 text-center text-sm font-bold text-white bg-red-900 border-r border-b border-gray-300 uppercase tracking-wider">{day}</div>))}
+                                    {Array.from({ length: firstDay }).map((_, i) => (<div key={`empty-${i}`} className="bg-gray-50 h-24 md:h-28 border-r border-b border-gray-300 relative group transition-colors hover:bg-gray-100"></div>))}
                                     {Array.from({ length: daysInMonth }).map((_, i) => {
                                         const day = i + 1;
                                         const dateStr = formatDate(year, month, day);
                                         const dayAssignments = assignments.filter(a => a.dateStr === dateStr);
+                                        const dayHolidays = HOLIDAYS_2026.filter(h => h.date === dateStr);
+                                        
                                         const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
                                         const isTarget = !!selectedStoreId;
+                                        const isHoliday = dayHolidays.length > 0;
+                                        
                                         return (
-                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative h-32 md:h-40 flex flex-col gap-1 transition-colors bg-white ${isTarget ? 'cursor-pointer hover:bg-red-50 ring-inset ring-2 ring-red-800 z-10' : ''} ${isToday ? 'bg-red-50' : ''}`}>
+                                            <div key={day} onClick={() => handleDateClick(day)} className={`relative h-24 md:h-28 flex flex-col gap-1 border-r border-b border-gray-300 transition-colors bg-white ${isTarget ? 'cursor-pointer hover:bg-red-50 ring-inset ring-2 ring-red-800 z-10' : ''} ${isToday ? 'bg-red-50' : ''}`}>
                                                 <div className="flex justify-between items-start p-1 shrink-0">
-                                                    <span className={`text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-red-800 text-white shadow-md' : 'text-black'}`}>{day}</span>
+                                                    <span className={`text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-red-800 text-white shadow-md' : isHoliday ? 'bg-blue-100 text-blue-800' : 'text-black'}`}>{day}</span>
                                                 </div>
                                                 <div className="flex-1 flex flex-col gap-1 w-full overflow-y-auto custom-scrollbar px-1 pb-1">
+                                                    {dayHolidays.map((hol, idx) => (
+                                                        <div key={`hol-${idx}`} className="shrink-0 text-[10px] p-1 rounded border shadow-sm bg-blue-50 text-blue-800 border-blue-200 mb-1 flex flex-col items-center text-center leading-tight w-full" title={hol.name}>
+                                                            <span className="font-bold w-full break-words line-clamp-2">{hol.name}</span>
+                                                            <span className="text-[8px] uppercase opacity-70 mt-0.5">{hol.type}</span>
+                                                        </div>
+                                                    ))}
                                                     {dayAssignments.map((assign, idx) => {
                                                         const store = filteredStores.find(s => s.id === assign.storeId);
                                                         if (!store) return null;
