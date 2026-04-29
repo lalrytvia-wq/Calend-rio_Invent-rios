@@ -456,7 +456,7 @@ Data,Loja,Coordenadora,Transporte,Status
                 setStats(loadedStats);
                 const defaultAssignments = parseScheduleCSV(INITIAL_SCHEDULE_CSV, loadedStores);
 
-                const savedAssign = localStorage.getItem('diamantes_inventory_assignments_v19');
+                const savedAssign = localStorage.getItem('diamantes_inventory_assignments_v20'); // Atualizado para v20 para forçar sincronização do novo preenchimento
                 if (savedAssign) {
                     const parsed = JSON.parse(savedAssign);
                     if (parsed.length > 0) {
@@ -481,7 +481,7 @@ Data,Loja,Coordenadora,Transporte,Status
             }, []);
 
             useEffect(() => {
-                localStorage.setItem('diamantes_inventory_assignments_v19', JSON.stringify(assignments));
+                localStorage.setItem('diamantes_inventory_assignments_v20', JSON.stringify(assignments));
             }, [assignments]);
 
             useEffect(() => {
